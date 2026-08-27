@@ -332,7 +332,11 @@
             <button class="cover-edit-btn" onclick="document.getElementById('cover-file-input').click()">🖼️ কভার ফটো</button>
           </div>
           <div class="profile-head-inner">
-            <div class="avatar" id="profile-avatar-big" style="width:96px; height:96px; font-size:36px; margin:0 auto 12px;"></div>
+            <div style="position:relative; width:96px; margin:0 auto 12px;">
+              <div class="avatar" id="profile-avatar-big" style="width:96px; height:96px; font-size:36px;"></div>
+              <input type="file" id="avatar-file-input" accept="image/*" style="display:none;" onchange="handleAvatarSelect(event)">
+              <button onclick="document.getElementById('avatar-file-input').click()" title="প্রোফাইল ছবি বদলাও" style="position:absolute; bottom:0; right:0; width:30px; height:30px; border-radius:50%; background:var(--blue); color:#fff; border:2px solid #fff; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">📷</button>
+            </div>
             <div style="font-size:24px; font-weight:800;" id="profile-name-big"></div>
             <div style="color:var(--sub); font-size:14px; margin-top:4px;" id="profile-bio-line"></div>
             <div style="color:var(--sub); font-size:14px; margin-top:4px;" id="profile-joined"></div>
@@ -454,7 +458,15 @@ function toast(msg){
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(()=>{ t.style.display='none'; }, 2200);
 }
+function avatarUrlFor(name){
+  const u = (typeof USERS !== 'undefined' ? USERS : []).find(x=>x.username===name);
+  return u && u.avatarUrl ? u.avatarUrl : null;
+}
 function avatarEl(name, size){
+  const url = avatarUrlFor(name);
+  if(url){
+    return `<div class="avatar" style="width:${size}px;height:${size}px;">${'<img src="'+url+'">'}</div>`;
+  }
   return `<div class="avatar" style="width:${size}px;height:${size}px;font-size:${Math.floor(size*0.4)}px;background:${colorFor(name)}">${initials(name)}</div>`;
 }
 
@@ -746,9 +758,22 @@ async function enterApp(){
   setInterval(loadFriends, 15000);
 }
 function setAvatarNode(node, name, size){
-  node.style.background = colorFor(name);
-  node.textContent = initials(name);
+  const url = avatarUrlFor(name);
   node.style.width = size+'px'; node.style.height = size+'px';
+  if(url){
+    node.style.background = 'none';
+    node.textContent = '';
+    node.innerHTML = `<img src="${url}">`;
+  } else {
+    node.innerHTML = '';
+    node.style.background = colorFor(name);
+    node.textContent = initials(name);
+  }
+}
+function refreshMyAvatarNodes(){
+  setAvatarNode(document.getElementById('my-avatar-top'), ME, 36);
+  setAvatarNode(document.getElementById('my-avatar-nav'), ME, 36);
+  setAvatarNode(document.getElementById('my-avatar-composer'), ME, 40);
 }
 function logOut(){
   localStorage.removeItem('connectify_me');
@@ -1013,10 +1038,18 @@ function renderFeed(){
   container.innerHTML = visible.map(postCardHtml).join('');
 }
 function renderProfile(){
-  document.getElementById('profile-avatar-big').style.background = colorFor(ME);
-  document.getElementById('profile-avatar-big').textContent = initials(ME);
+  const userInfo0 = USERS.find(u=>u.username===ME) || {};
+  const bigAv = document.getElementById('profile-avatar-big');
+  if(userInfo0.avatarUrl){
+    bigAv.style.background = 'none';
+    bigAv.innerHTML = `<img src="${userInfo0.avatarUrl}">`;
+  } else {
+    bigAv.style.background = colorFor(ME);
+    bigAv.innerHTML = '';
+    bigAv.textContent = initials(ME);
+  }
   document.getElementById('profile-name-big').textContent = ME;
-  const userInfo = USERS.find(u=>u.username===ME) || {};
+  const userInfo = userInfo0;
   const coverWrap = document.getElementById('profile-cover-wrap');
   const existingImg = coverWrap.querySelector('img');
   if(userInfo.coverUrl){
@@ -1095,6 +1128,36 @@ async function saveCoverPhoto(dataUrl){
   toast('কভার ফটো আপডেট হয়েছে');
 }
 
+function handleAvatarSelect(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const maxW = 500;
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      saveAvatarPhoto(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  evt.target.value = '';
+}
+async function saveAvatarPhoto(dataUrl){
+  try{
+    await apiPost({action:'uploadAvatar', username:ME, imageBase64:dataUrl});
+    await loadUsers();
+  }catch(e){ toast('প্রোফাইল ছবি সেভ করতে সমস্যা হয়েছে'); return; }
+  renderProfile();
+  toast('প্রোফাইল ছবি আপডেট হয়েছে');
+}
+
 // ---------- ইউজার / সদস্য ----------
 async function loadUsers(){
   try{
@@ -1103,6 +1166,7 @@ async function loadUsers(){
   }catch(e){ USERS = []; }
   renderMembers();
   renderFriendsView();
+  refreshMyAvatarNodes();
   if(currentView === 'profile') renderProfile();
 }
 function friendStatusWith(name){
