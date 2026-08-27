@@ -257,6 +257,30 @@
     width:40px;height:40px;border-radius:50%; background:var(--bg);
     display:flex;align-items:center;justify-content:center; font-size:18px; flex-shrink:0;
   }
+
+  /* ---- নোটিফিকেশন ---- */
+  .notif-btn{position:relative;}
+  .notif-panel{
+    position:absolute; top:52px; right:0; width:320px; max-height:420px; overflow-y:auto;
+    background:#fff; border-radius:14px; box-shadow:var(--shadow-lg); display:none; z-index:120; border:1px solid var(--border);
+  }
+  .notif-panel.show{display:block; animation:popIn .15s ease;}
+  .notif-header{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--border); font-weight:700; font-size:14px;}
+  .notif-mark-read{font-size:12px; color:var(--blue); cursor:pointer; font-weight:700; background:none; border:none;}
+  .notif-item{display:flex; gap:10px; align-items:flex-start; padding:11px 14px; cursor:pointer; transition:background .12s ease; border-bottom:1px solid var(--border);}
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item:hover{background:var(--hover);}
+  .notif-item.unread{background:var(--blue-soft);}
+  .notif-text{font-size:13px; line-height:1.4;}
+  .notif-time{font-size:11px; color:var(--sub); margin-top:2px;}
+
+  /* ---- সেভ / শেয়ার ---- */
+  .action-btn.saved{color:var(--blue);}
+  .shared-header{font-size:13px; color:var(--sub); display:flex; align-items:center; gap:6px; padding:0 18px; margin-top:12px; font-weight:600;}
+  .shared-original{border:1.5px solid var(--border); border-radius:12px; margin:8px 18px 0; padding:10px 12px; background:var(--bg);}
+  .shared-original .post-author{font-size:14px;}
+  .shared-original .post-text{font-size:14px; margin-bottom:6px;}
+  .shared-original .post-image{max-height:260px; margin-bottom:0;}
 </style>
 </head>
 <body>
@@ -327,6 +351,15 @@
       <button class="icon-btn" title="বন্ধুরা" onclick="showView('friends')">
         👥<span class="badge" id="req-badge-top" style="display:none;"></span>
       </button>
+      <div class="notif-btn">
+        <button class="icon-btn" title="নোটিফিকেশন" onclick="toggleNotifPanel(event)">
+          🔔<span class="badge" id="notif-badge-top" style="display:none;"></span>
+        </button>
+        <div class="notif-panel" id="notif-panel">
+          <div class="notif-header">নোটিফিকেশন <button class="notif-mark-read" onclick="markAllNotifRead()">সব পড়া হয়েছে</button></div>
+          <div id="notif-list"></div>
+        </div>
+      </div>
       <div class="avatar" id="my-avatar-top" style="width:36px;height:36px;font-size:14px;" onclick="showView('profile')"></div>
     </div>
   </header>
@@ -342,6 +375,9 @@
       <div class="nav-item" id="nav-friends" onclick="showView('friends')">
         <div class="nav-icon" style="background:#FFEAF2;">👥</div> বন্ধুরা
         <span class="nav-badge" id="req-badge-nav" style="display:none;"></span>
+      </div>
+      <div class="nav-item" id="nav-saved" onclick="showView('saved')">
+        <div class="nav-icon" style="background:#E6F7EE;">🔖</div> সেভ করা পোস্ট
       </div>
       <div class="side-title" style="margin-top:20px;">শীঘ্রই আসছে</div>
       <div style="font-size:13px; color:var(--sub); padding:0 8px; line-height:1.6;">
@@ -422,6 +458,13 @@
           </div>
         </div>
       </div>
+
+      <div id="view-saved" style="display:none;">
+        <div class="side-title" style="margin-top:0;">সেভ করা পোস্ট</div>
+        <div id="saved-posts-container">
+          <div class="empty-state">এখনো কোনো পোস্ট সেভ করোনি</div>
+        </div>
+      </div>
     </main>
 
     <aside class="col-right">
@@ -468,6 +511,23 @@
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="share-post-overlay">
+  <div class="modal-box">
+    <div class="modal-header">পোস্ট শেয়ার করো <button class="modal-close" onclick="closeShareModal()">✕</button></div>
+    <div class="modal-body">
+      <textarea id="share-post-text" placeholder="কিছু লিখতে চাও? (না লিখলেও চলবে)" style="min-height:70px;"></textarea>
+      <select class="privacy-select" id="share-post-privacy" style="width:100%;">
+        <option value="public">🌐 সবাই দেখতে পাবে</option>
+        <option value="friends">👥 শুধু বন্ধুরা</option>
+        <option value="onlyme">🔒 শুধু আমি</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-small outline" onclick="closeShareModal()">বাতিল</button>
+      <button class="btn-small primary" onclick="submitShare()">শেয়ার করো</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -481,6 +541,8 @@ let FRIENDS = [];
 let currentView = 'feed';
 let selectedImageDataUrl = null;
 let editingPostId = null;
+let sharingPostId = null;
+let NOTIFICATIONS = [];
 const AVATAR_COLORS = ['#6C5CE7','#E4405F','#22C55E','#F5A623','#8B5CF6','#00B8D9','#EC4899','#4E9BFF'];
 const REACTIONS = { like:'👍', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡' };
 
@@ -801,14 +863,19 @@ async function enterApp(){
     if(!e.target.closest('.topbar-search-wrap')){
       document.getElementById('search-results').classList.remove('show');
     }
+    if(!e.target.closest('.notif-btn')){
+      document.getElementById('notif-panel').classList.remove('show');
+    }
   });
 
   await loadPosts();
   await loadUsers();
   await loadFriends();
+  await loadNotifications();
   setInterval(loadPosts, 15000);
   setInterval(loadUsers, 20000);
   setInterval(loadFriends, 15000);
+  setInterval(loadNotifications, 15000);
 }
 function setAvatarNode(node, name, size){
   const url = avatarUrlFor(name);
@@ -1036,9 +1103,32 @@ function privacyIcon(p){
   if(p==='onlyme') return '🔒';
   return '🌐';
 }
+function isSavedByMe(post){
+  return !!(post.savedBy && post.savedBy.includes(ME));
+}
+function sharedOriginalHtml(post){
+  if(!post.sharedFrom) return '';
+  const original = POSTS.find(p=>p.postId===post.sharedFrom);
+  if(!original){
+    return `<div class="shared-original" style="color:var(--sub); font-size:13px;">মূল পোস্টটি মুছে ফেলা হয়েছে</div>`;
+  }
+  return `
+    <div class="shared-original">
+      <div class="post-head" style="margin-bottom:6px;">
+        ${avatarEl(original.author, 32)}
+        <div>
+          <div class="post-author">${escapeHtml(original.author)}</div>
+          <div class="post-meta">${timeAgo(original.createdAt)}</div>
+        </div>
+      </div>
+      ${original.text ? `<div class="post-text">${escapeHtml(original.text)}</div>` : ''}
+      ${original.imageUrl ? `<img class="post-image" src="${original.imageUrl}">` : ''}
+    </div>`;
+}
 function postCardHtml(post){
   const myReact = myReactionOn(post);
   const liked = !!myReact;
+  const saved = isSavedByMe(post);
   const commentsHtml = post.comments.map(c => `
     <div class="comment">
       ${avatarEl(c.author, 28)}
@@ -1050,6 +1140,7 @@ function postCardHtml(post){
   const imageHtml = post.imageUrl ? `<img class="post-image" src="${post.imageUrl}">` : '';
   const labels = {like:'লাইক', love:'ভালোবাসা', haha:'হাহা', wow:'বাহ', sad:'কষ্ট', angry:'রাগ'};
   const reactBtnLabel = myReact ? `${REACTIONS[myReact]} ${labels[myReact]}` : '👍 লাইক';
+  const sharedHeader = post.sharedFrom ? `<div class="shared-header">↗️ ${escapeHtml(post.author)} শেয়ার করেছে</div>` : '';
   return `
     <div class="card post" data-post-id="${post.postId}">
       <div class="post-head">
@@ -1062,6 +1153,7 @@ function postCardHtml(post){
       </div>
       ${post.text ? `<div class="post-text">${escapeHtml(post.text)}</div>` : ''}
       ${imageHtml}
+      ${sharedOriginalHtml(post)}
       <div class="post-stats">
         <span>${reactSummaryHtml(post)}</span>
         <span>${post.comments.length ? post.comments.length + ' মন্তব্য' : ''}</span>
@@ -1070,6 +1162,8 @@ function postCardHtml(post){
         ${reactionPopupHtml(post.postId)}
         <button class="action-btn js-react-hold ${liked ? 'liked' : ''}" onclick="quickReact('${post.postId}')" oncontextmenu="event.preventDefault(); toggleReactionPopup('${post.postId}')" ontouchstart="window._reactTimer=setTimeout(()=>toggleReactionPopup('${post.postId}'),450)" ontouchend="clearTimeout(window._reactTimer)" onmouseenter="window._reactHoverTimer=setTimeout(()=>toggleReactionPopup('${post.postId}'),500)" onmouseleave="clearTimeout(window._reactHoverTimer)">${reactBtnLabel}</button>
         <button class="action-btn" onclick="document.getElementById('cin-${post.postId}').focus()">💬 মন্তব্য</button>
+        <button class="action-btn" onclick="openShareModal('${post.postId}')">↗️ শেয়ার</button>
+        <button class="action-btn ${saved ? 'saved' : ''}" onclick="toggleSavePost('${post.postId}')">${saved ? '🔖 সেভ করা' : '🔖 সেভ'}</button>
       </div>
       <div class="comments-section">
         ${commentsHtml}
@@ -1080,6 +1174,104 @@ function postCardHtml(post){
       </div>
     </div>
   `;
+}
+async function toggleSavePost(postId){
+  await apiPost({action:'toggleSavePost', postId, username:ME});
+  await loadPosts();
+  if(currentView==='saved') renderSavedView();
+  toast('সেভ আপডেট হয়েছে');
+}
+function renderSavedView(){
+  const container = document.getElementById('saved-posts-container');
+  const saved = POSTS.filter(isSavedByMe);
+  if(!saved.length){
+    container.innerHTML = `<div class="card empty-state"><h3>এখনো কোনো পোস্ট সেভ নেই</h3>পোস্টের নিচে 🔖 বাটনে ক্লিক করে সেভ করো।</div>`;
+    return;
+  }
+  container.innerHTML = saved.map(postCardHtml).join('');
+}
+function openShareModal(postId){
+  sharingPostId = postId;
+  document.getElementById('share-post-text').value = '';
+  document.getElementById('share-post-privacy').value = 'public';
+  document.getElementById('share-post-overlay').classList.add('show');
+}
+function closeShareModal(){
+  sharingPostId = null;
+  document.getElementById('share-post-overlay').classList.remove('show');
+}
+async function submitShare(){
+  if(!sharingPostId) return;
+  const text = document.getElementById('share-post-text').value.trim();
+  const privacy = document.getElementById('share-post-privacy').value;
+  await apiPost({action:'createPost', author:ME, text, privacy, sharedFrom:sharingPostId});
+  closeShareModal();
+  await loadPosts();
+  toast('পোস্ট শেয়ার হয়েছে');
+}
+
+// ---------- নোটিফিকেশন ----------
+async function loadNotifications(){
+  try{
+    const result = await apiGet('getNotifications', {username:ME});
+    NOTIFICATIONS = result.success ? result.notifications : [];
+  }catch(e){ NOTIFICATIONS = []; }
+  renderNotifBadge();
+}
+function renderNotifBadge(){
+  const n = NOTIFICATIONS.filter(x=>!x.read).length;
+  const el = document.getElementById('notif-badge-top');
+  if(n>0){ el.style.display='flex'; el.textContent = n>9 ? '9+' : n; } else { el.style.display='none'; }
+}
+function notifText(n){
+  const map = {
+    friend_request: `<b>${escapeHtml(n.fromUser)}</b> তোমাকে বন্ধুত্বের অনুরোধ পাঠিয়েছে`,
+    friend_accept: `<b>${escapeHtml(n.fromUser)}</b> তোমার বন্ধুত্বের অনুরোধ গ্রহণ করেছে`,
+    reaction: `<b>${escapeHtml(n.fromUser)}</b> তোমার পোস্টে রিয়্যাক্ট করেছে`,
+    comment: `<b>${escapeHtml(n.fromUser)}</b> তোমার পোস্টে মন্তব্য করেছে`,
+    share: `<b>${escapeHtml(n.fromUser)}</b> তোমার পোস্ট শেয়ার করেছে`
+  };
+  return map[n.type] || 'নতুন নোটিফিকেশন';
+}
+function renderNotifList(){
+  const box = document.getElementById('notif-list');
+  if(!NOTIFICATIONS.length){
+    box.innerHTML = `<div style="padding:20px; text-align:center; color:var(--sub); font-size:13px;">এখনো কোনো নোটিফিকেশন নেই</div>`;
+    return;
+  }
+  box.innerHTML = NOTIFICATIONS.map(n => `
+    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="handleNotifClick('${n.notifId}', ${n.postId ? `'${n.postId}'` : 'null'})">
+      ${avatarEl(n.fromUser, 36)}
+      <div>
+        <div class="notif-text">${notifText(n)}</div>
+        <div class="notif-time">${timeAgo(n.createdAt)}</div>
+      </div>
+    </div>`).join('');
+}
+function toggleNotifPanel(e){
+  e.stopPropagation();
+  const panel = document.getElementById('notif-panel');
+  const willShow = !panel.classList.contains('show');
+  document.querySelectorAll('.notif-panel.show, .search-results.show').forEach(p=>p.classList.remove('show'));
+  if(willShow){ panel.classList.add('show'); renderNotifList(); }
+}
+async function markAllNotifRead(){
+  await apiPost({action:'markNotificationsRead', username:ME});
+  NOTIFICATIONS.forEach(n=>n.read=true);
+  renderNotifBadge();
+  renderNotifList();
+}
+function handleNotifClick(notifId, postId){
+  document.getElementById('notif-panel').classList.remove('show');
+  if(postId){
+    showView('feed');
+    setTimeout(()=>{
+      const el = document.querySelector(`[data-post-id="${postId}"]`);
+      if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.style.boxShadow = '0 0 0 3px var(--blue)'; setTimeout(()=>el.style.boxShadow='', 1500); }
+    }, 100);
+  } else {
+    showView('friends');
+  }
 }
 function renderFeed(){
   const container = document.getElementById('posts-container');
@@ -1378,14 +1570,17 @@ function showView(view){
   document.getElementById('view-feed').style.display = view==='feed' ? 'block' : 'none';
   document.getElementById('view-profile').style.display = view==='profile' ? 'block' : 'none';
   document.getElementById('view-friends').style.display = view==='friends' ? 'block' : 'none';
+  document.getElementById('view-saved').style.display = view==='saved' ? 'block' : 'none';
   document.getElementById('nav-feed').classList.toggle('active', view==='feed');
   document.getElementById('nav-profile').classList.toggle('active', view==='profile');
   document.getElementById('nav-friends').classList.toggle('active', view==='friends');
+  document.getElementById('nav-saved').classList.toggle('active', view==='saved');
   document.getElementById('bn-feed').classList.toggle('active', view==='feed');
   document.getElementById('bn-profile').classList.toggle('active', view==='profile');
   document.getElementById('bn-friends').classList.toggle('active', view==='friends');
   if(view==='profile') renderProfile();
   if(view==='friends') loadFriends();
+  if(view==='saved') renderSavedView();
 }
 
 // ---------- বুট ----------
