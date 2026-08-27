@@ -23,6 +23,33 @@
     --shadow-md:0 8px 24px rgba(45,30,90,0.10);
     --shadow-lg:0 20px 48px rgba(45,30,90,0.16);
   }
+  html[data-theme="dark"]{
+    --blue:#8B7CF6;
+    --blue-dark:#A79BFF;
+    --blue-soft:#2A2650;
+    --bg:#15141F;
+    --card:#1E1D2C;
+    --text:#EDEBFA;
+    --sub:#9C99B5;
+    --border:#302E42;
+    --green:#34D67A;
+    --hover:#26243A;
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.35), 0 1px 1px rgba(0,0,0,0.25);
+    --shadow-md:0 8px 24px rgba(0,0,0,0.45);
+    --shadow-lg:0 20px 48px rgba(0,0,0,0.55);
+  }
+  html[data-theme="dark"] body{
+    background:
+      radial-gradient(900px 500px at 100% -10%, #241F45 0%, rgba(36,31,69,0) 60%),
+      radial-gradient(700px 400px at -5% 0%, #17233A 0%, rgba(23,35,58,0) 55%),
+      var(--bg);
+  }
+  html[data-theme="dark"] #login-screen{
+    background:
+      radial-gradient(1000px 600px at 15% 10%, #241F45 0%, rgba(36,31,69,0) 55%),
+      radial-gradient(900px 600px at 90% 90%, #17233A 0%, rgba(23,35,58,0) 55%),
+      linear-gradient(180deg,#15141F 0%, #100F18 100%);
+  }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
   body{
@@ -141,6 +168,17 @@
   .image-preview-wrap{position:relative; margin-top:10px; display:inline-block;}
   .image-preview-wrap img{max-width:100%; max-height:280px; border-radius:12px; display:block;}
   .image-remove{position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; border:none; width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:14px;}
+  .image-preview-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:8px; margin-top:10px;}
+  .image-preview-grid .image-preview-wrap{margin-top:0;}
+  .image-preview-grid .image-preview-wrap img{max-height:100px; width:100%; object-fit:cover;}
+  .post-image-grid{display:grid; gap:4px; margin-bottom:10px; border-radius:12px; overflow:hidden;}
+  .post-image-grid.n1{grid-template-columns:1fr;}
+  .post-image-grid.n2{grid-template-columns:1fr 1fr;}
+  .post-image-grid.n3{grid-template-columns:1fr 1fr;}
+  .post-image-grid.n3 .pimg:first-child{grid-row:span 2;}
+  .post-image-grid.n4plus{grid-template-columns:1fr 1fr;}
+  .post-image-grid img{width:100%; height:100%; object-fit:cover; display:block; max-height:420px;}
+  .post-image-grid.n1 img{max-height:480px;}
   select.privacy-select{border:1.5px solid var(--border); border-radius:10px; padding:7px 10px; font-size:13px; font-family:inherit; color:var(--sub); background:var(--bg); cursor:pointer;}
 
   .post{padding:14px 18px; position:relative;}
@@ -180,6 +218,24 @@
   .btn-small.outline:hover{background:var(--hover); border-color:var(--blue); color:var(--blue-dark);}
   .btn-small.danger{background:none; border:1.5px solid var(--border); color:#D63447;}
   .btn-small.danger:hover{background:#FDECEC; border-color:#F6B8B8;}
+
+  /* ---- সেটিংস ---- */
+  .settings-section-title{font-size:13px; font-weight:700; color:var(--sub); text-transform:uppercase; letter-spacing:.03em; padding:16px 4px 8px;}
+  .settings-row{display:flex; align-items:center; gap:12px; padding:13px 4px; border-bottom:1px solid var(--border); cursor:pointer;}
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row:hover{background:var(--hover);}
+  .settings-row.disabled{cursor:default; opacity:.6;}
+  .settings-row.disabled:hover{background:none;}
+  .settings-icon{width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; background:var(--hover);}
+  .settings-row-title{font-weight:700; font-size:14.5px;}
+  .settings-row-sub{font-size:12.5px; color:var(--sub); margin-top:1px;}
+  .settings-row-arrow{margin-left:auto; color:var(--sub); font-size:15px;}
+  .toggle-switch{position:relative; display:inline-block; width:42px; height:24px; margin-left:auto; flex-shrink:0;}
+  .toggle-switch input{opacity:0; width:0; height:0;}
+  .toggle-slider{position:absolute; cursor:pointer; inset:0; background:#CBD2E0; border-radius:24px; transition:.2s;}
+  .toggle-slider:before{position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.2s;}
+  .toggle-switch input:checked + .toggle-slider{background:var(--blue);}
+  .toggle-switch input:checked + .toggle-slider:before{transform:translateX(18px);}
 
   .post-menu-btn{background:none; border:none; cursor:pointer; font-size:18px; color:var(--sub); width:32px; height:32px; border-radius:50%; margin-left:auto; transition:background .15s ease;}
   .post-menu-btn:hover{background:var(--hover);}
@@ -347,6 +403,7 @@
       <div class="search-results" id="search-results"></div>
     </div>
     <div class="topbar-right">
+      <button class="icon-btn" title="ডার্ক/লাইট মোড" onclick="toggleTheme()" id="theme-toggle-btn">🌙</button>
       <button class="icon-btn" title="ফিড" onclick="showView('feed')" style="display:none;" id="topbar-home-btn">🏠</button>
       <button class="icon-btn" title="বন্ধুরা" onclick="showView('friends')">
         👥<span class="badge" id="req-badge-top" style="display:none;"></span>
@@ -379,9 +436,17 @@
       <div class="nav-item" id="nav-saved" onclick="showView('saved')">
         <div class="nav-icon" style="background:#E6F7EE;">🔖</div> সেভ করা পোস্ট
       </div>
+      <div class="nav-item" id="nav-messages" onclick="showView('messages')">
+        <div class="nav-icon" style="background:#E7F3FF;">💬</div> মেসেজ
+        <span class="nav-badge" id="msg-badge-nav" style="display:none;"></span>
+      </div>
+      <div class="nav-item" id="nav-admin" style="display:none;" onclick="showView('admin')">
+        <div class="nav-icon" style="background:#FFF3E0;">🛠️</div> অ্যাডমিন প্যানেল
+        <span class="nav-badge" id="report-badge-nav" style="display:none;"></span>
+      </div>
       <div class="side-title" style="margin-top:20px;">শীঘ্রই আসছে</div>
       <div style="font-size:13px; color:var(--sub); padding:0 8px; line-height:1.6;">
-        মেসেজ, রিল, স্টোরি ও গ্রুপ ফিচার পরবর্তী ধাপে যোগ হবে।
+        রিল, স্টোরি ও গ্রুপ ফিচার পরবর্তী ধাপে যোগ হবে।
       </div>
     </aside>
 
@@ -395,10 +460,12 @@
           <div id="composer-expand" style="display:none;">
             <textarea id="post-text" placeholder="তুমি কী নিয়ে ভাবছো?"></textarea>
             <div id="image-preview-container"></div>
-            <input type="file" id="image-file-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+            <input type="file" id="image-file-input" accept="image/*" multiple style="display:none;" onchange="handleImageSelect(event)">
+            <div id="tag-chips-container" style="display:none; flex-wrap:wrap; gap:6px; margin:8px 0;"></div>
             <div class="composer-divider"></div>
             <div class="composer-actions">
               <button class="btn-photo" onclick="document.getElementById('image-file-input').click()">🖼️ ছবি</button>
+              <button class="btn-photo" onclick="openTagModal()">🏷️ ট্যাগ বন্ধু</button>
               <select class="privacy-select" id="post-privacy">
                 <option value="public">🌐 সবাই দেখতে পাবে</option>
                 <option value="friends">👥 শুধু বন্ধুরা</option>
@@ -431,6 +498,7 @@
             <div style="color:var(--sub); font-size:14px; margin-top:4px;" id="profile-joined"></div>
             <div style="display:flex; gap:8px; justify-content:center; margin-top:14px;">
               <button class="btn-small outline" style="padding:8px 20px;" onclick="openAboutModal()">প্রোফাইল এডিট</button>
+              <button class="btn-small outline" style="padding:8px 20px;" onclick="showView('settings')">⚙️ সেটিংস</button>
               <button class="btn-small outline" style="padding:8px 20px;" onclick="logOut()">লগ আউট</button>
             </div>
           </div>
@@ -456,6 +524,10 @@
             <div class="side-title">সবাই</div>
             <div id="all-users-list"></div>
           </div>
+          <div class="friends-section" id="blocked-users-section" style="display:none;">
+            <div class="side-title">ব্লক করা ইউজার</div>
+            <div id="blocked-users-list"></div>
+          </div>
         </div>
       </div>
 
@@ -463,6 +535,43 @@
         <div class="side-title" style="margin-top:0;">সেভ করা পোস্ট</div>
         <div id="saved-posts-container">
           <div class="empty-state">এখনো কোনো পোস্ট সেভ করোনি</div>
+        </div>
+      </div>
+
+      <div id="view-messages" style="display:none;">
+        <div class="card" style="padding:0; overflow:hidden; display:flex; min-height:60vh;">
+          <div style="width:100%; max-width:280px; border-right:1px solid var(--border); overflow-y:auto;" id="conversation-list-wrap">
+            <div class="side-title" style="margin-top:0; padding:14px 14px 6px;">মেসেজ</div>
+            <div id="conversation-list"></div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column;" id="chat-panel-wrap">
+            <div id="chat-empty-state" class="empty-state" style="border:none; margin:auto;">একটা কথোপকথন বেছে নাও</div>
+            <div id="chat-panel" style="display:none; flex-direction:column; height:100%;">
+              <div style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; font-weight:700;" id="chat-header"></div>
+              <div id="chat-messages" style="flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:8px;"></div>
+              <div style="padding:12px; border-top:1px solid var(--border); display:flex; gap:8px;">
+                <input type="text" id="chat-input" placeholder="মেসেজ লেখো..." style="flex:1; border-radius:20px; border:1.5px solid var(--border); padding:10px 16px; font-size:14px; background:var(--bg); color:var(--text);" onkeydown="if(event.key==='Enter'){sendChatMessage()}">
+                <button class="btn-post" onclick="sendChatMessage()">পাঠাও</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-admin" style="display:none;">
+        <div class="side-title" style="margin-top:0;">রিপোর্ট করা কনটেন্ট</div>
+        <div id="reports-container">
+          <div class="empty-state">লোড হচ্ছে...</div>
+        </div>
+      </div>
+
+      <div id="view-settings" style="display:none;">
+        <div class="card" style="padding:4px 16px 16px;">
+          <div style="display:flex; align-items:center; gap:10px; padding:14px 4px 4px;">
+            <button class="icon-btn" onclick="showView('profile')" style="background:none;">←</button>
+            <div style="font-size:19px; font-weight:800;">সেটিংস</div>
+          </div>
+          <div id="settings-body"></div>
         </div>
       </div>
     </main>
@@ -477,6 +586,9 @@
     <button class="bottom-nav-item active" id="bn-feed" onclick="showView('feed')">🏠</button>
     <button class="bottom-nav-item" id="bn-friends" onclick="showView('friends')">
       👥<span class="bn-badge" id="req-badge-bn" style="display:none;"></span>
+    </button>
+    <button class="bottom-nav-item" id="bn-messages" onclick="showView('messages')">
+      💬<span class="bn-badge" id="msg-badge-bn" style="display:none;"></span>
     </button>
     <button class="bottom-nav-item" id="bn-profile" onclick="showView('profile')">👤</button>
   </nav>
@@ -511,6 +623,55 @@
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="tag-modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">বন্ধুদের ট্যাগ করো <button class="modal-close" onclick="closeTagModal()">✕</button></div>
+    <div class="modal-body">
+      <div id="tag-friend-list" style="max-height:320px; overflow-y:auto;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-small primary" onclick="closeTagModal()">হয়ে গেছে</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="change-password-overlay">
+  <div class="modal-box">
+    <div class="modal-header">পাসওয়ার্ড পরিবর্তন <button class="modal-close" onclick="closeChangePasswordModal()">✕</button></div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:10px;">
+      <input type="password" id="cp-old-password" placeholder="বর্তমান পাসওয়ার্ড" style="padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text);">
+      <input type="password" id="cp-new-password" placeholder="নতুন পাসওয়ার্ড" style="padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text);">
+      <input type="password" id="cp-new-password-confirm" placeholder="নতুন পাসওয়ার্ড আবার লেখো" style="padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text);">
+      <div id="cp-error" style="color:#D63447; font-size:13px; display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-small outline" onclick="closeChangePasswordModal()">বাতিল</button>
+      <button class="btn-small primary" onclick="submitChangePassword()">পরিবর্তন করো</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="delete-account-overlay">
+  <div class="modal-box">
+    <div class="modal-header">অ্যাকাউন্ট মুছে ফেলো <button class="modal-close" onclick="closeDeleteAccountModal()">✕</button></div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:10px;">
+      <div style="font-size:13.5px; color:var(--sub);">এটা স্থায়ীভাবে তোমার অ্যাকাউন্ট, পোস্ট, বন্ধু তালিকা ও মেসেজ মুছে দেবে। এটা আর ফেরত আনা যাবে না।</div>
+      <input type="password" id="da-password" placeholder="নিশ্চিত করতে পাসওয়ার্ড লেখো" style="padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text);">
+      <div id="da-error" style="color:#D63447; font-size:13px; display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-small outline" onclick="closeDeleteAccountModal()">বাতিল</button>
+      <button class="btn-small danger" style="background:#D63447; color:#fff; border-color:#D63447;" onclick="submitDeleteAccount()">স্থায়ীভাবে মুছে ফেলো</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="info-modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header"><span id="info-modal-title"></span> <button class="modal-close" onclick="closeInfoModal()">✕</button></div>
+    <div class="modal-body" style="font-size:13.5px; line-height:1.7; color:var(--text);" id="info-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-small primary" onclick="closeInfoModal()">ঠিক আছে</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="share-post-overlay">
   <div class="modal-box">
     <div class="modal-header">পোস্ট শেয়ার করো <button class="modal-close" onclick="closeShareModal()">✕</button></div>
@@ -534,17 +695,45 @@
 // ⚠️ এখানে আপনার Apps Script ওয়েব অ্যাপ URL বসান
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQKEhi8G7VHEapLkhTHXzp314gyfJZr8lMHBQxLWGpylWB1pILSXsQMRXny5KxhEk/exec";
 
+// এখানে ব্যাকএন্ডের ADMIN_USERNAMES-এর সাথে মিলিয়ে অ্যাডমিন ইউজারনেম বসাও
+const ADMIN_USERNAMES = ['alamin'];
+
 let ME = null;
 let POSTS = [];
 let USERS = [];
 let FRIENDS = [];
 let currentView = 'feed';
-let selectedImageDataUrl = null;
+let selectedImagesDataUrls = [];
 let editingPostId = null;
 let sharingPostId = null;
 let NOTIFICATIONS = [];
+let MESSAGES = [];
+let REPORTS = [];
+let activeConversationUser = null;
+let selectedTagUsers = [];
 const AVATAR_COLORS = ['#6C5CE7','#E4405F','#22C55E','#F5A623','#8B5CF6','#00B8D9','#EC4899','#4E9BFF'];
 const REACTIONS = { like:'👍', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡' };
+
+// ---------- থিম (ডার্ক/লাইট/সিস্টেম) ----------
+function applyTheme(){
+  const saved = localStorage.getItem('myadda_theme') || 'light';
+  const effective = saved === 'system' ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : saved;
+  document.documentElement.setAttribute('data-theme', effective);
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = effective === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('myadda_theme', next);
+  applyTheme();
+  if(currentView === 'settings') renderSettingsView();
+}
+function setThemeMode(mode){
+  localStorage.setItem('myadda_theme', mode);
+  applyTheme();
+  renderSettingsView();
+}
 
 function colorFor(name){
   let h = 0;
@@ -868,14 +1057,22 @@ async function enterApp(){
     }
   });
 
+  if(ADMIN_USERNAMES.includes(ME)){
+    document.getElementById('nav-admin').style.display = 'flex';
+  }
+
   await loadPosts();
   await loadUsers();
   await loadFriends();
   await loadNotifications();
+  await loadMessages();
+  await loadReports();
   setInterval(loadPosts, 15000);
   setInterval(loadUsers, 20000);
   setInterval(loadFriends, 15000);
   setInterval(loadNotifications, 15000);
+  setInterval(loadMessages, 8000);
+  setInterval(loadReports, 20000);
 }
 function setAvatarNode(node, name, size){
   const url = avatarUrlFor(name);
@@ -921,41 +1118,93 @@ function openComposer(){
   document.getElementById('composer-expand').style.display = 'block';
   document.getElementById('post-text').focus();
 }
+const MAX_POST_IMAGES = 6;
 function updatePostBtnState(){
   const hasText = document.getElementById('post-text').value.trim().length > 0;
-  document.getElementById('post-btn').disabled = !(hasText || selectedImageDataUrl);
+  document.getElementById('post-btn').disabled = !(hasText || selectedImagesDataUrls.length);
+}
+function renderImagePreviews(){
+  const box = document.getElementById('image-preview-container');
+  if(!selectedImagesDataUrls.length){ box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="image-preview-grid">` + selectedImagesDataUrls.map((url, idx) => `
+    <div class="image-preview-wrap">
+      <img src="${url}">
+      <button class="image-remove" onclick="removeSelectedImage(${idx})">✕</button>
+    </div>`).join('') + `</div>`;
 }
 function handleImageSelect(evt){
-  const file = evt.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    const img = new Image();
-    img.onload = function(){
-      const maxW = 900;
-      const scale = Math.min(1, maxW / img.width);
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(img.width * scale);
-      canvas.height = Math.round(img.height * scale);
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      selectedImageDataUrl = canvas.toDataURL('image/jpeg', 0.72);
-      document.getElementById('image-preview-container').innerHTML = `
-        <div class="image-preview-wrap">
-          <img src="${selectedImageDataUrl}">
-          <button class="image-remove" onclick="removeSelectedImage()">✕</button>
-        </div>`;
-      updatePostBtnState();
+  const files = Array.from(evt.target.files || []);
+  if(!files.length) return;
+  const room = MAX_POST_IMAGES - selectedImagesDataUrls.length;
+  if(room <= 0){ toast('সর্বোচ্চ ' + MAX_POST_IMAGES + 'টা ছবি দেওয়া যাবে'); evt.target.value=''; return; }
+  files.slice(0, room).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const img = new Image();
+      img.onload = function(){
+        const maxW = 900;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        selectedImagesDataUrls.push(canvas.toDataURL('image/jpeg', 0.72));
+        renderImagePreviews();
+        updatePostBtnState();
+      };
+      img.src = e.target.result;
     };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
+  });
   evt.target.value = '';
 }
-function removeSelectedImage(){
-  selectedImageDataUrl = null;
-  document.getElementById('image-preview-container').innerHTML = '';
+function removeSelectedImage(idx){
+  selectedImagesDataUrls.splice(idx, 1);
+  renderImagePreviews();
   updatePostBtnState();
+}
+
+// ---------- বন্ধু ট্যাগ ----------
+function myAcceptedFriends(){
+  return FRIENDS.filter(f => f.status==='accepted' && (f.userA===ME || f.userB===ME))
+    .map(f => f.userA===ME ? f.userB : f.userA);
+}
+function openTagModal(){
+  renderTagFriendList();
+  document.getElementById('tag-modal-overlay').classList.add('show');
+}
+function closeTagModal(){
+  document.getElementById('tag-modal-overlay').classList.remove('show');
+}
+function renderTagFriendList(){
+  const box = document.getElementById('tag-friend-list');
+  const friends = myAcceptedFriends();
+  if(!friends.length){
+    box.innerHTML = `<div style="padding:10px; color:var(--sub); font-size:13px;">ট্যাগ করার মতো কোনো বন্ধু নেই — আগে বন্ধু বানাও।</div>`;
+    return;
+  }
+  box.innerHTML = friends.map(name => `
+    <label class="friend-item" style="cursor:pointer;">
+      <div class="friend-row">${avatarEl(name,32)}<div class="friend-info"><div class="friend-item-name">${escapeHtml(name)}</div></div></div>
+      <input type="checkbox" ${selectedTagUsers.includes(name) ? 'checked' : ''} onchange="toggleTagUser('${escapeHtml(name)}')">
+    </label>`).join('');
+}
+function toggleTagUser(name){
+  const idx = selectedTagUsers.indexOf(name);
+  if(idx === -1) selectedTagUsers.push(name);
+  else selectedTagUsers.splice(idx, 1);
+  renderTagChips();
+}
+function renderTagChips(){
+  const box = document.getElementById('tag-chips-container');
+  if(!selectedTagUsers.length){ box.style.display = 'none'; box.innerHTML=''; return; }
+  box.style.display = 'flex';
+  box.innerHTML = selectedTagUsers.map(name => `
+    <span class="btn-small outline" style="border-radius:20px; display:inline-flex; align-items:center; gap:6px;">
+      🏷️ ${escapeHtml(name)}
+      <span style="cursor:pointer; font-weight:800;" onclick="toggleTagUser('${escapeHtml(name)}'); renderTagFriendList();">✕</span>
+    </span>`).join('');
 }
 
 // ---------- পোস্ট ----------
@@ -974,19 +1223,28 @@ function visibleToMe(post){
     const rec = friendStatusWith(post.author);
     return rec && rec.status === 'accepted';
   }
+  if(post.author === ME) return true;
+  const authorInfo = USERS.find(u=>u.username===post.author);
+  if(authorInfo && authorInfo.profileLocked){
+    const rec = friendStatusWith(post.author);
+    return !!(rec && rec.status === 'accepted');
+  }
   return true;
 }
 async function submitPost(){
   const textEl = document.getElementById('post-text');
   const text = textEl.value.trim();
-  if(!text && !selectedImageDataUrl) return;
+  if(!text && !selectedImagesDataUrls.length) return;
   const btn = document.getElementById('post-btn');
   btn.disabled = true;
   const privacy = document.getElementById('post-privacy').value;
   try{
-    await apiPost({action:'createPost', author:ME, text, imageBase64:selectedImageDataUrl, privacy});
+    await apiPost({action:'createPost', author:ME, text, imagesBase64:selectedImagesDataUrls, privacy, taggedUsers:selectedTagUsers});
     textEl.value = '';
-    removeSelectedImage();
+    selectedImagesDataUrls = [];
+    selectedTagUsers = [];
+    renderImagePreviews();
+    renderTagChips();
     document.getElementById('composer-expand').style.display = 'none';
     await loadPosts();
     toast('পোস্ট হয়ে গেছে');
@@ -1093,7 +1351,12 @@ function postMenuHtml(post){
         <button class="danger" onclick="closeAllMenus(); deletePost('${post.postId}')">🗑️ মুছে ফেলো</button>
       </div>`;
   }
-  return '';
+  return `
+    <button class="post-menu-btn" onclick="event.stopPropagation(); togglePostMenu('${post.postId}')">⋯</button>
+    <div class="post-menu" id="menu-${post.postId}">
+      <button onclick="reportPostAction('${post.postId}')">🚩 রিপোর্ট করো</button>
+      <button class="danger" onclick="closeAllMenus(); blockUserAction('${escapeHtml(post.author)}')">🚫 ${escapeHtml(post.author)}-কে ব্লক করো</button>
+    </div>`;
 }
 function closeAllMenus(){
   document.querySelectorAll('.post-menu.show').forEach(m=>m.classList.remove('show'));
@@ -1122,8 +1385,28 @@ function sharedOriginalHtml(post){
         </div>
       </div>
       ${original.text ? `<div class="post-text">${escapeHtml(original.text)}</div>` : ''}
-      ${original.imageUrl ? `<img class="post-image" src="${original.imageUrl}">` : ''}
+      ${postImagesHtml(original)}
     </div>`;
+}
+function postImagesHtml(post){
+  const urls = post.imageUrls && post.imageUrls.length ? post.imageUrls : (post.imageUrl ? [post.imageUrl] : []);
+  if(!urls.length) return '';
+  const n = urls.length;
+  const cls = n===1 ? 'n1' : n===2 ? 'n2' : n===3 ? 'n3' : 'n4plus';
+  const shown = urls.slice(0, 4);
+  if(isDataSaverOn()){
+    return `<div class="post-image-grid ${cls}">` + shown.map((u,i) => `
+      <div class="pimg" style="position:relative; background:var(--hover); display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="this.outerHTML='<div class=&quot;pimg&quot;><img src=&quot;${u}&quot;></div>'">
+        <span style="font-size:13px; color:var(--sub); font-weight:600;">🖼️ ছবি দেখতে ট্যাপ করো</span>
+      </div>`).join('') + `</div>`;
+  }
+  return `<div class="post-image-grid ${cls}">` + shown.map((u,i) => {
+    const isLastOverlay = (n > 4 && i === 3);
+    return `<div class="pimg" style="position:relative;">
+      <img src="${u}" loading="lazy">
+      ${isLastOverlay ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.5); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;">+${n-4}</div>` : ''}
+    </div>`;
+  }).join('') + `</div>`;
 }
 function postCardHtml(post){
   const myReact = myReactionOn(post);
@@ -1137,7 +1420,7 @@ function postCardHtml(post){
       </div>
     </div>
   `).join('');
-  const imageHtml = post.imageUrl ? `<img class="post-image" src="${post.imageUrl}">` : '';
+  const imageHtml = postImagesHtml(post);
   const labels = {like:'লাইক', love:'ভালোবাসা', haha:'হাহা', wow:'বাহ', sad:'কষ্ট', angry:'রাগ'};
   const reactBtnLabel = myReact ? `${REACTIONS[myReact]} ${labels[myReact]}` : '👍 লাইক';
   const sharedHeader = post.sharedFrom ? `<div class="shared-header">↗️ ${escapeHtml(post.author)} শেয়ার করেছে</div>` : '';
@@ -1152,6 +1435,7 @@ function postCardHtml(post){
         ${postMenuHtml(post)}
       </div>
       ${post.text ? `<div class="post-text">${escapeHtml(post.text)}</div>` : ''}
+      ${post.taggedUsers && post.taggedUsers.length ? `<div style="font-size:13px; color:var(--sub); padding:0 18px 8px;">🏷️ ট্যাগ করেছে: ${post.taggedUsers.map(u=>`<b>${escapeHtml(u)}</b>`).join(', ')}</div>` : ''}
       ${imageHtml}
       ${sharedOriginalHtml(post)}
       <div class="post-stats">
@@ -1211,7 +1495,14 @@ async function submitShare(){
 }
 
 // ---------- নোটিফিকেশন ----------
+function isPushNotifOn(){
+  return localStorage.getItem('myadda_push_notif') !== 'off';
+}
+function isDataSaverOn(){
+  return localStorage.getItem('myadda_data_saver') === 'on';
+}
 async function loadNotifications(){
+  if(!isPushNotifOn()) return;
   try{
     const result = await apiGet('getNotifications', {username:ME});
     NOTIFICATIONS = result.success ? result.notifications : [];
@@ -1219,6 +1510,7 @@ async function loadNotifications(){
   renderNotifBadge();
 }
 function renderNotifBadge(){
+  if(!isPushNotifOn()){ document.getElementById('notif-badge-top').style.display='none'; return; }
   const n = NOTIFICATIONS.filter(x=>!x.read).length;
   const el = document.getElementById('notif-badge-top');
   if(n>0){ el.style.display='flex'; el.textContent = n>9 ? '9+' : n; } else { el.style.display='none'; }
@@ -1229,7 +1521,9 @@ function notifText(n){
     friend_accept: `<b>${escapeHtml(n.fromUser)}</b> তোমার বন্ধুত্বের অনুরোধ গ্রহণ করেছে`,
     reaction: `<b>${escapeHtml(n.fromUser)}</b> তোমার পোস্টে রিয়্যাক্ট করেছে`,
     comment: `<b>${escapeHtml(n.fromUser)}</b> তোমার পোস্টে মন্তব্য করেছে`,
-    share: `<b>${escapeHtml(n.fromUser)}</b> তোমার পোস্ট শেয়ার করেছে`
+    share: `<b>${escapeHtml(n.fromUser)}</b> তোমার পোস্ট শেয়ার করেছে`,
+    tag: `<b>${escapeHtml(n.fromUser)}</b> তোমাকে একটা পোস্টে ট্যাগ করেছে`,
+    message: `<b>${escapeHtml(n.fromUser)}</b> তোমাকে মেসেজ পাঠিয়েছে`
   };
   return map[n.type] || 'নতুন নোটিফিকেশন';
 }
@@ -1263,6 +1557,12 @@ async function markAllNotifRead(){
 }
 function handleNotifClick(notifId, postId){
   document.getElementById('notif-panel').classList.remove('show');
+  const n = NOTIFICATIONS.find(x=>x.notifId===notifId);
+  if(n && n.type === 'message'){
+    showView('messages');
+    setTimeout(()=>openConversation(n.fromUser), 100);
+    return;
+  }
   if(postId){
     showView('feed');
     setTimeout(()=>{
@@ -1273,14 +1573,25 @@ function handleNotifClick(notifId, postId){
     showView('friends');
   }
 }
+let feedRenderCount = 10;
+const FEED_PAGE_SIZE = 10;
 function renderFeed(){
   const container = document.getElementById('posts-container');
-  const visible = POSTS.filter(visibleToMe);
+  const visible = POSTS.filter(visibleToMe).filter(p => !isBlockedEitherWay(p.author));
   if(!visible.length){
     container.innerHTML = `<div class="card empty-state"><h3>এখনো কোনো পোস্ট নেই</h3>প্রথম পোস্টটা তুমিই করো!</div>`;
     return;
   }
-  container.innerHTML = visible.map(postCardHtml).join('');
+  const shown = visible.slice(0, feedRenderCount);
+  let html = shown.map(postCardHtml).join('');
+  if (visible.length > shown.length) {
+    html += `<div style="text-align:center; padding:14px;"><button class="btn-small outline" onclick="loadMoreFeed()">আরও পোস্ট দেখাও</button></div>`;
+  }
+  container.innerHTML = html;
+}
+function loadMoreFeed(){
+  feedRenderCount += FEED_PAGE_SIZE;
+  renderFeed();
 }
 function renderProfile(){
   const userInfo0 = USERS.find(u=>u.username===ME) || {};
@@ -1406,31 +1717,71 @@ async function saveAvatarPhoto(dataUrl){
 // ---------- ইউজার / সদস্য ----------
 async function loadUsers(){
   try{
-    const result = await apiGet('getUsers');
+    const result = await apiGet('getUsers', {viewer: ME});
     USERS = result.success ? result.users : [];
   }catch(e){ USERS = []; }
   renderMembers();
   renderFriendsView();
   refreshMyAvatarNodes();
   if(currentView === 'profile') renderProfile();
+  if(currentView === 'settings') renderSettingsView();
 }
 function friendStatusWith(name){
   const rec = FRIENDS.find(f => (f.userA===ME && f.userB===name) || (f.userA===name && f.userB===ME));
   if(!rec) return null;
   return rec;
 }
+// ---------- ব্লক ----------
+function iBlocked(name){
+  const rec = friendStatusWith(name);
+  return !!(rec && rec.status === 'blocked' && rec.requestedBy === ME);
+}
+function blockedMe(name){
+  const rec = friendStatusWith(name);
+  return !!(rec && rec.status === 'blocked' && rec.requestedBy === name);
+}
+function isBlockedEitherWay(name){
+  if (name === ME) return false;
+  return iBlocked(name) || blockedMe(name);
+}
+async function blockUserAction(name){
+  if(!confirm(escapeHtml(name) + '-কে ব্লক করতে চাও? ব্লক করলে তোমরা একে অপরের পোস্ট আর দেখতে পাবে না।')) return;
+  await apiPost({action:'blockUser', blocker:ME, target:name});
+  toast(name + '-কে ব্লক করা হলো');
+  await loadFriends();
+  await loadUsers();
+  await loadPosts();
+}
+async function unblockUserAction(name){
+  await apiPost({action:'unblockUser', blocker:ME, target:name});
+  toast(name + '-কে আনব্লক করা হলো');
+  await loadFriends();
+  await loadUsers();
+  await loadPosts();
+}
+async function reportUserAction(name){
+  const reason = prompt('কেন রিপোর্ট করছো? (ঐচ্ছিক)') || '';
+  await apiPost({action:'reportUser', target:name, reporter:ME, reason});
+  toast('রিপোর্ট পাঠানো হয়েছে, ধন্যবাদ');
+}
+async function reportPostAction(postId){
+  closeAllMenus();
+  const reason = prompt('কেন রিপোর্ট করছো? (ঐচ্ছিক)') || '';
+  await apiPost({action:'reportPost', postId, reporter:ME, reason});
+  toast('রিপোর্ট পাঠানো হয়েছে, ধন্যবাদ');
+}
 function renderMembers(){
-  document.getElementById('member-count').textContent = USERS.length;
-  document.getElementById('members-list').innerHTML = USERS
+  const visibleUsers = USERS.filter(u => u.username !== ME && !isBlockedEitherWay(u.username));
+  document.getElementById('member-count').textContent = visibleUsers.length;
+  document.getElementById('members-list').innerHTML = visibleUsers
     .slice().sort((a,b)=>b.joinedAt-a.joinedAt)
     .map(u => {
-      if(u.username === ME) return '';
       const rec = friendStatusWith(u.username);
       let actionHtml = '';
       if(!rec){
         actionHtml = `<button class="btn-small outline" onclick="sendFriendRequest('${escapeHtml(u.username)}')">যোগ করো</button>`;
       } else if(rec.status === 'accepted'){
-        actionHtml = `<span style="font-size:12px; color:var(--green); font-weight:700;">বন্ধু</span>`;
+        actionHtml = `<button class="btn-small outline" onclick="showView('messages'); setTimeout(()=>openConversation('${escapeHtml(u.username)}'),50)">💬</button>`;
       } else if(rec.status === 'pending' && rec.requestedBy === ME){
         actionHtml = `<span style="font-size:12px; color:var(--sub);">পাঠানো হয়েছে</span>`;
       } else {
@@ -1459,7 +1810,10 @@ async function loadFriends(){
 }
 async function sendFriendRequest(name){
   const result = await apiPost({action:'sendFriendRequest', from:ME, to:name});
-  if(!result.success){ toast('এই সম্পর্ক ইতিমধ্যে আছে'); return; }
+  if(!result.success){
+    toast(result.error === 'blocked' ? 'এই ইউজারের সাথে যোগাযোগ সম্ভব না' : 'এই সম্পর্ক ইতিমধ্যে আছে');
+    return;
+  }
   toast('অনুরোধ পাঠানো হয়েছে');
   await loadFriends();
 }
@@ -1498,24 +1852,365 @@ function renderFriendsView(){
   const myFriendsEl = document.getElementById('my-friends-list');
   myFriendsEl.innerHTML = accepted.length ? accepted.map(f=>{
     const other = f.userA===ME ? f.userB : f.userA;
-    return `<div class="friend-item"><div class="friend-row">${avatarEl(other,36)}<div class="friend-info"><div class="friend-item-name">${escapeHtml(other)}</div></div></div></div>`;
+    return `<div class="friend-item"><div class="friend-row">${avatarEl(other,36)}<div class="friend-info"><div class="friend-item-name">${escapeHtml(other)}</div></div></div><button class="btn-small outline" onclick="showView('messages'); setTimeout(()=>openConversation('${escapeHtml(other)}'),50)">💬 মেসেজ</button></div>`;
   }).join('') : `<div style="font-size:13px; color:var(--sub); padding:4px;">এখনো কোনো বন্ধু নেই</div>`;
 
   const allEl = document.getElementById('all-users-list');
-  const others = USERS.filter(u=>u.username!==ME);
+  const others = USERS.filter(u=>u.username!==ME && !isBlockedEitherWay(u.username));
   allEl.innerHTML = others.length ? others.map(u=>{
     const rec = friendStatusWith(u.username);
     let actionHtml = '';
     if(!rec){ actionHtml = `<button class="btn-small outline" onclick="sendFriendRequest('${escapeHtml(u.username)}')">যোগ করো</button>`; }
-    else if(rec.status==='accepted'){ actionHtml = `<span style="font-size:12px; color:var(--green); font-weight:700;">বন্ধু</span>`; }
+    else if(rec.status==='accepted'){ actionHtml = `<button class="btn-small outline" onclick="showView('messages'); setTimeout(()=>openConversation('${escapeHtml(u.username)}'),50)">💬 মেসেজ</button>`; }
     else if(rec.status==='pending' && rec.requestedBy===ME){ actionHtml = `<span style="font-size:12px; color:var(--sub);">পাঠানো হয়েছে</span>`; }
     else { actionHtml = `<button class="btn-small primary" onclick="respondFriendRequest('${escapeHtml(u.username)}', true)">গ্রহণ</button>`; }
     return `
     <div class="friend-item">
       <div class="friend-row">${avatarEl(u.username,36)}<div class="friend-info"><div class="friend-item-name">${escapeHtml(u.username)}</div></div></div>
-      ${actionHtml}
+      <div style="display:flex; gap:6px; align-items:center;">
+        ${actionHtml}
+        <button class="btn-small outline" title="ব্লক" onclick="blockUserAction('${escapeHtml(u.username)}')">🚫</button>
+        <button class="btn-small outline" title="রিপোর্ট" onclick="reportUserAction('${escapeHtml(u.username)}')">🚩</button>
+      </div>
     </div>`;
   }).join('') : `<div style="font-size:13px; color:var(--sub); padding:4px;">এখনো আর কেউ যোগ দেয়নি</div>`;
+
+  const blockedByMe = FRIENDS.filter(f => f.status==='blocked' && f.requestedBy===ME && (f.userA===ME || f.userB===ME));
+  const blockedSection = document.getElementById('blocked-users-section');
+  if (blockedSection) {
+    if (blockedByMe.length) {
+      blockedSection.style.display = 'block';
+      document.getElementById('blocked-users-list').innerHTML = blockedByMe.map(f=>{
+        const other = f.userA===ME ? f.userB : f.userA;
+        return `
+        <div class="friend-item">
+          <div class="friend-row">${avatarEl(other,36)}<div class="friend-info"><div class="friend-item-name">${escapeHtml(other)}</div></div></div>
+          <button class="btn-small outline" onclick="unblockUserAction('${escapeHtml(other)}')">আনব্লক করো</button>
+        </div>`;
+      }).join('');
+    } else {
+      blockedSection.style.display = 'none';
+    }
+  }
+}
+
+// ---------- মেসেজিং ----------
+async function loadMessages(){
+  try{
+    const result = await apiGet('getMessages', {username:ME});
+    MESSAGES = result.success ? result.messages : [];
+  }catch(e){ MESSAGES = []; }
+  updateMessageBadge();
+  if(currentView === 'messages') renderMessagesView();
+}
+function conversationPartners(){
+  const set = new Set();
+  MESSAGES.forEach(m => set.add(m.from===ME ? m.to : m.from));
+  return Array.from(set).sort((a,b)=>{
+    const lastA = lastMessageWith(a);
+    const lastB = lastMessageWith(b);
+    return (lastB ? lastB.createdAt : 0) - (lastA ? lastA.createdAt : 0);
+  });
+}
+function lastMessageWith(other){
+  const msgs = MESSAGES.filter(m => (m.from===ME && m.to===other) || (m.from===other && m.to===ME));
+  return msgs.length ? msgs[msgs.length-1] : null;
+}
+function unreadCountWith(other){
+  return MESSAGES.filter(m => m.from===other && m.to===ME && !m.read).length;
+}
+function updateMessageBadge(){
+  const totalUnread = MESSAGES.filter(m => m.to===ME && !m.read).length;
+  ['msg-badge-nav','msg-badge-bn'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(totalUnread>0){ el.style.display='flex'; el.textContent = totalUnread>9 ? '9+' : totalUnread; }
+    else{ el.style.display='none'; }
+  });
+}
+function renderMessagesView(){
+  const partners = conversationPartners();
+  const listEl = document.getElementById('conversation-list');
+  if(!partners.length){
+    listEl.innerHTML = `<div style="padding:14px; color:var(--sub); font-size:13px;">এখনো কোনো মেসেজ নেই। বন্ধুদের তালিকা থেকে 💬 বাটনে ক্লিক করে শুরু করো।</div>`;
+  } else {
+    listEl.innerHTML = partners.map(p=>{
+      const last = lastMessageWith(p);
+      const unread = unreadCountWith(p);
+      return `
+      <div class="friend-item ${activeConversationUser===p ? 'active' : ''}" style="cursor:pointer; ${activeConversationUser===p ? 'background:var(--hover);' : ''}" onclick="openConversation('${escapeHtml(p)}')">
+        <div class="friend-row">
+          ${avatarEl(p, 36)}
+          <div class="friend-info">
+            <div class="friend-item-name">${escapeHtml(p)}</div>
+            <div style="font-size:12px; color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;">${last ? escapeHtml(last.text) : ''}</div>
+          </div>
+        </div>
+        ${unread ? `<span class="nav-badge" style="margin-left:0;">${unread}</span>` : ''}
+      </div>`;
+    }).join('');
+  }
+  if(activeConversationUser) renderChatPanel();
+}
+async function openConversation(username){
+  activeConversationUser = username;
+  document.getElementById('chat-empty-state').style.display = 'none';
+  document.getElementById('chat-panel').style.display = 'flex';
+  renderMessagesView();
+  renderChatPanel();
+  await apiPost({action:'markMessagesRead', username:ME, other:username});
+  await loadMessages();
+}
+function renderChatPanel(){
+  document.getElementById('chat-header').innerHTML = `${avatarEl(activeConversationUser,32)}<span>${escapeHtml(activeConversationUser)}</span>`;
+  const msgs = MESSAGES.filter(m => (m.from===ME && m.to===activeConversationUser) || (m.from===activeConversationUser && m.to===ME));
+  const box = document.getElementById('chat-messages');
+  box.innerHTML = msgs.map(m => `
+    <div style="max-width:70%; align-self:${m.from===ME ? 'flex-end' : 'flex-start'}; background:${m.from===ME ? 'var(--blue)' : 'var(--hover)'}; color:${m.from===ME ? '#fff' : 'var(--text)'}; padding:8px 14px; border-radius:16px; font-size:14px;">
+      ${escapeHtml(m.text)}
+    </div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+async function sendChatMessage(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text || !activeConversationUser) return;
+  input.value = '';
+  const result = await apiPost({action:'sendMessage', from:ME, to:activeConversationUser, text});
+  if(!result.success){
+    toast(result.error === 'blocked' ? 'এই ইউজারের সাথে যোগাযোগ সম্ভব না' : 'মেসেজ পাঠাতে সমস্যা হয়েছে');
+    return;
+  }
+  await loadMessages();
+}
+
+// ---------- অ্যাডমিন প্যানেল ----------
+async function loadReports(){
+  if(!ADMIN_USERNAMES.includes(ME)) return;
+  try{
+    const result = await apiGet('getReports', {username:ME});
+    REPORTS = result.success ? result.reports : [];
+  }catch(e){ REPORTS = []; }
+  updateReportBadge();
+  if(currentView === 'admin') renderReportsView();
+}
+function updateReportBadge(){
+  const unresolved = REPORTS.filter(r=>!r.resolved).length;
+  const el = document.getElementById('report-badge-nav');
+  if(!el) return;
+  if(unresolved>0){ el.style.display='flex'; el.textContent = unresolved>9 ? '9+' : unresolved; }
+  else{ el.style.display='none'; }
+}
+function reportTypeLabel(r){
+  return r.type === 'post' ? 'পোস্ট রিপোর্ট' : 'ইউজার রিপোর্ট';
+}
+function renderReportsView(){
+  const box = document.getElementById('reports-container');
+  if(!REPORTS.length){
+    box.innerHTML = `<div class="card empty-state">এখনো কোনো রিপোর্ট আসেনি</div>`;
+    return;
+  }
+  box.innerHTML = REPORTS.map(r => `
+    <div class="card" style="padding:14px; ${r.resolved ? 'opacity:.55;' : ''}">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+        <div>
+          <div style="font-weight:700; font-size:14px;">${reportTypeLabel(r)} — ${escapeHtml(r.reportedUser || '')}</div>
+          <div style="font-size:13px; color:var(--sub); margin-top:4px;">রিপোর্ট করেছে: <b>${escapeHtml(r.reportedBy)}</b></div>
+          ${r.reason ? `<div style="font-size:13px; margin-top:6px;">কারণ: ${escapeHtml(r.reason)}</div>` : ''}
+          <div style="font-size:12px; color:var(--sub); margin-top:6px;">${timeAgo(r.createdAt)}${r.resolved ? ' · সমাধান হয়েছে' : ''}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          ${!r.resolved ? `<button class="btn-small primary" onclick="resolveReportAction('${r.reportId}')">সমাধান হয়েছে</button>` : ''}
+          ${r.type==='post' && r.targetId ? `<button class="btn-small outline" onclick="adminDeletePostAction('${r.targetId}')">পোস্ট ডিলিট</button>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+async function resolveReportAction(reportId){
+  await apiPost({action:'resolveReport', admin:ME, reportId});
+  await loadReports();
+  toast('রিপোর্ট সমাধান হিসেবে চিহ্নিত হলো');
+}
+async function adminDeletePostAction(postId){
+  if(!confirm('এই পোস্টটা সরাসরি ডিলিট করতে চাও?')) return;
+  await apiPost({action:'adminDeletePost', admin:ME, postId});
+  await loadPosts();
+  await loadReports();
+  toast('পোস্ট ডিলিট হয়েছে');
+}
+
+// ---------- সেটিংস ----------
+function myUserInfo(){
+  return USERS.find(u=>u.username===ME) || {};
+}
+function settingsToggleRow(icon, title, sub, checked, onchange){
+  return `
+    <div class="settings-row" style="cursor:default;">
+      <div class="settings-icon">${icon}</div>
+      <div><div class="settings-row-title">${title}</div>${sub ? `<div class="settings-row-sub">${sub}</div>` : ''}</div>
+      <label class="toggle-switch">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="${onchange}">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>`;
+}
+function settingsLinkRow(icon, title, sub, onclick){
+  return `
+    <div class="settings-row" onclick="${onclick}">
+      <div class="settings-icon">${icon}</div>
+      <div><div class="settings-row-title">${title}</div>${sub ? `<div class="settings-row-sub">${sub}</div>` : ''}</div>
+      <div class="settings-row-arrow">›</div>
+    </div>`;
+}
+function settingsComingSoonRow(icon, title, sub){
+  return `
+    <div class="settings-row disabled" onclick="toast('এই ফিচারটা শীঘ্রই আসছে')">
+      <div class="settings-icon">${icon}</div>
+      <div><div class="settings-row-title">${title}</div>${sub ? `<div class="settings-row-sub">${sub}</div>` : ''}</div>
+      <div class="settings-row-arrow">›</div>
+    </div>`;
+}
+function renderSettingsView(){
+  const info = myUserInfo();
+  const themeMode = localStorage.getItem('myadda_theme') || 'light';
+  const themeLabel = themeMode==='system' ? 'সিস্টেম ডিফল্ট' : themeMode==='dark' ? 'ডার্ক' : 'লাইট';
+  const html = `
+    <div class="settings-section-title" style="padding-top:6px;">অ্যাকাউন্ট পরিবর্তন</div>
+    ${settingsComingSoonRow('👤','অন্য অ্যাকাউন্ট যোগ করো','একসাথে একাধিক অ্যাকাউন্ট চালানো — শীঘ্রই আসছে')}
+
+    <div class="settings-section-title">অ্যাকাউন্ট</div>
+    ${settingsLinkRow('🪪','ব্যক্তিগত তথ্য', escapeHtml(ME) + (info.email ? ' · ' + escapeHtml(info.email) : ''), "openAboutModal()")}
+    ${settingsLinkRow('🔒','পাসওয়ার্ড পরিবর্তন','তোমার পাসওয়ার্ড আপডেট করো', "openChangePasswordModal()")}
+    ${settingsToggleRow('🔐','প্রোফাইল লক', 'লক করলে অ-বন্ধুরা তোমার পাবলিক পোস্ট দেখতে পাবে না', !!info.profileLocked, "toggleProfileLockAction(this.checked)")}
+    ${settingsComingSoonRow('📊','প্রফেশনাল ড্যাশবোর্ড','ইনসাইটস, মনিটাইজেশন ও আয়')}
+    ${settingsComingSoonRow('✅','ভেরিফিকেশন ব্যাজ','ভেরিফায়েড চেকমার্ক পান')}
+    ${settingsComingSoonRow('⭐','অ্যাম্বাসেডর হাব','প্রোগ্রামে যোগ দিন ও পুরস্কার অর্জন করুন')}
+    ${settingsComingSoonRow('🔖','সংরক্ষিত রিলস','রিলস ফিচার এখনো যোগ হয়নি')}
+
+    <div class="settings-section-title">অ্যাপিয়ারেন্স</div>
+    ${settingsLinkRow('🌙','থিম', themeLabel, "openThemeChooser()")}
+    ${settingsLinkRow('🌐','ভাষা','বাংলা (Bengali)', "toast('এখন শুধু বাংলাতেই পাওয়া যাচ্ছে')")}
+
+    <div class="settings-section-title">স্টোরেজ</div>
+    ${settingsLinkRow('🗑️','ক্যাশ মুছুন','অ্যাপের লোকাল ডেটা মুছে নতুন করে লোড করো', "clearAppCache()")}
+
+    <div class="settings-section-title">পছন্দসমূহ</div>
+    ${settingsToggleRow('🔔','পুশ নোটিফিকেশন','বন্ধুদের থেকে নোটিফিকেশন পান', isPushNotifOn(), "togglePushNotif(this.checked)")}
+    ${settingsToggleRow('📶','ডেটা সেভার মোড','ডেটা ব্যবহার কমাও — ছবি ট্যাপ করলে দেখা যাবে', isDataSaverOn(), "toggleDataSaver(this.checked)")}
+    ${settingsComingSoonRow('▶️','ভিডিও স্বয়ংক্রিয় প্লে','ভিডিও ফিচার এখনো যোগ হয়নি')}
+
+    <div class="settings-section-title">সাপোর্ট</div>
+    ${settingsLinkRow('🆘','সাহায্য ও সহায়তা','অ্যাপ ব্যবহারে সমস্যা?', "showInfoModal('সাহায্য ও সহায়তা','যেকোনো সমস্যায় অ্যাপের অ্যাডমিনের সাথে যোগাযোগ করো। বাগ রিপোর্ট বা ফিচার আইডিয়া থাকলে জানাতে পারো।')")}
+    ${settingsLinkRow('🛡️','গোপনীয়তা নীতি','', "showInfoModal('গোপনীয়তা নীতি','তোমার দেওয়া তথ্য (নাম, ইমেইল, পোস্ট, ছবি) শুধু এই অ্যাপ চালাতে ব্যবহৃত হয় এবং Google Sheets/Drive-এ সংরক্ষিত থাকে। এটা কোনো তৃতীয় পক্ষের সাথে শেয়ার করা হয় না।')")}
+    ${settingsLinkRow('📄','সেবার শর্তাবলী','', "showInfoModal('সেবার শর্তাবলী','এই অ্যাপ ব্যবহার করে তুমি সম্মত হচ্ছো যে এখানে শালীন আচরণ বজায় রাখবে এবং অন্যদের হয়রানি করবে না। নিয়ম ভাঙলে অ্যাডমিন তোমার অ্যাকাউন্ট বন্ধ করে দিতে পারে।')")}
+    ${settingsLinkRow('ℹ️','সম্পর্কে','Version 1.0.0', "showInfoModal('MyAdda সম্পর্কে','MyAdda — বন্ধুদের সাথে যুক্ত থাকার একটা ছোট্ট বাংলা সোশ্যাল অ্যাপ। Version 1.0.0')")}
+
+    <div class="settings-section-title">ব্যবসা</div>
+    ${settingsComingSoonRow('💳','ওয়ালেট','ব্যালেন্স ও লেনদেন')}
+    ${settingsComingSoonRow('📢','আমার বিজ্ঞাপন','বিজ্ঞাপন পরিচালনা')}
+    ${settingsComingSoonRow('📄','আমার পেজ','পেজ পরিচালনা')}
+
+    <div class="settings-section-title"></div>
+    <div class="settings-row" onclick="logOut()"><div class="settings-icon">↩️</div><div class="settings-row-title" style="color:#D63447;">লগ আউট</div></div>
+    <div class="settings-row" onclick="openDeleteAccountModal()"><div class="settings-icon">⚠️</div><div class="settings-row-title" style="color:#D63447;">অ্যাকাউন্ট মুছুন</div></div>
+  `;
+  document.getElementById('settings-body').innerHTML = html;
+}
+function openThemeChooser(){
+  const current = localStorage.getItem('myadda_theme') || 'light';
+  const box = document.getElementById('tag-friend-list');
+  document.getElementById('tag-modal-overlay').classList.add('show');
+  document.querySelector('#tag-modal-overlay .modal-header').innerHTML = `থিম বেছে নাও <button class="modal-close" onclick="closeTagModal()">✕</button>`;
+  document.querySelector('#tag-modal-overlay .modal-footer').style.display = 'none';
+  box.innerHTML = ['light','dark','system'].map(m => {
+    const label = m==='light' ? '☀️ লাইট' : m==='dark' ? '🌙 ডার্ক' : '⚙️ সিস্টেম ডিফল্ট';
+    return `<div class="settings-row" onclick="setThemeMode('${m}'); closeTagModal(); document.querySelector('#tag-modal-overlay .modal-footer').style.display='flex'; document.querySelector('#tag-modal-overlay .modal-header').innerHTML='বন্ধুদের ট্যাগ করো <button class=&quot;modal-close&quot; onclick=&quot;closeTagModal()&quot;>✕</button>';">
+      <div class="settings-icon">${label.split(' ')[0]}</div><div class="settings-row-title">${label.split(' ')[1]}</div>
+      ${current===m ? '<div class="settings-row-arrow">✓</div>' : ''}
+    </div>`;
+  }).join('');
+}
+async function toggleProfileLockAction(checked){
+  await apiPost({action:'toggleProfileLock', username:ME, locked:checked});
+  await loadUsers();
+  toast(checked ? 'প্রোফাইল লক করা হলো' : 'প্রোফাইল আনলক করা হলো');
+}
+function togglePushNotif(checked){
+  localStorage.setItem('myadda_push_notif', checked ? 'on' : 'off');
+  if(checked) loadNotifications(); else renderNotifBadge();
+  toast(checked ? 'নোটিফিকেশন চালু হলো' : 'নোটিফিকেশন বন্ধ হলো');
+}
+function toggleDataSaver(checked){
+  localStorage.setItem('myadda_data_saver', checked ? 'on' : 'off');
+  renderFeed();
+  if(currentView==='profile') renderProfile();
+  toast(checked ? 'ডেটা সেভার চালু হলো' : 'ডেটা সেভার বন্ধ হলো');
+}
+async function clearAppCache(){
+  POSTS = []; USERS = []; FRIENDS = []; NOTIFICATIONS = []; MESSAGES = [];
+  toast('ক্যাশ মুছে আবার লোড হচ্ছে...');
+  await Promise.all([loadPosts(), loadUsers(), loadFriends(), loadNotifications(), loadMessages()]);
+  toast('লোড হয়ে গেছে');
+}
+function openChangePasswordModal(){
+  document.getElementById('cp-old-password').value = '';
+  document.getElementById('cp-new-password').value = '';
+  document.getElementById('cp-new-password-confirm').value = '';
+  document.getElementById('cp-error').style.display = 'none';
+  document.getElementById('change-password-overlay').classList.add('show');
+}
+function closeChangePasswordModal(){
+  document.getElementById('change-password-overlay').classList.remove('show');
+}
+async function submitChangePassword(){
+  const oldPw = document.getElementById('cp-old-password').value;
+  const newPw = document.getElementById('cp-new-password').value;
+  const confirmPw = document.getElementById('cp-new-password-confirm').value;
+  const errEl = document.getElementById('cp-error');
+  if(!oldPw || !newPw){ errEl.textContent = 'সব ঘর পূরণ করো'; errEl.style.display='block'; return; }
+  if(newPw.length < 6){ errEl.textContent = 'নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে'; errEl.style.display='block'; return; }
+  if(newPw !== confirmPw){ errEl.textContent = 'নতুন পাসওয়ার্ড দুটো মিলছে না'; errEl.style.display='block'; return; }
+  const oldPasswordHash = await hashPassword(oldPw);
+  const newPasswordHash = await hashPassword(newPw);
+  const result = await apiPost({action:'changePassword', username:ME, oldPasswordHash, newPasswordHash});
+  if(!result.success){
+    errEl.textContent = result.error === 'wrong_password' ? 'বর্তমান পাসওয়ার্ড ঠিক নেই' : 'কিছু একটা সমস্যা হয়েছে';
+    errEl.style.display = 'block';
+    return;
+  }
+  closeChangePasswordModal();
+  toast('পাসওয়ার্ড পরিবর্তন হয়েছে');
+}
+function openDeleteAccountModal(){
+  document.getElementById('da-password').value = '';
+  document.getElementById('da-error').style.display = 'none';
+  document.getElementById('delete-account-overlay').classList.add('show');
+}
+function closeDeleteAccountModal(){
+  document.getElementById('delete-account-overlay').classList.remove('show');
+}
+async function submitDeleteAccount(){
+  const pw = document.getElementById('da-password').value;
+  const errEl = document.getElementById('da-error');
+  if(!pw){ errEl.textContent = 'পাসওয়ার্ড লেখো'; errEl.style.display='block'; return; }
+  const passwordHash = await hashPassword(pw);
+  const result = await apiPost({action:'deleteAccount', username:ME, passwordHash});
+  if(!result.success){
+    errEl.textContent = result.error === 'wrong_password' ? 'পাসওয়ার্ড ঠিক নেই' : 'কিছু একটা সমস্যা হয়েছে';
+    errEl.style.display = 'block';
+    return;
+  }
+  closeDeleteAccountModal();
+  toast('অ্যাকাউন্ট মুছে ফেলা হয়েছে');
+  logOut();
+}
+function showInfoModal(title, body){
+  document.getElementById('info-modal-title').textContent = title;
+  document.getElementById('info-modal-body').textContent = body;
+  document.getElementById('info-modal-overlay').classList.add('show');
+}
+function closeInfoModal(){
+  document.getElementById('info-modal-overlay').classList.remove('show');
 }
 
 // ---------- সার্চ ----------
@@ -1571,19 +2266,29 @@ function showView(view){
   document.getElementById('view-profile').style.display = view==='profile' ? 'block' : 'none';
   document.getElementById('view-friends').style.display = view==='friends' ? 'block' : 'none';
   document.getElementById('view-saved').style.display = view==='saved' ? 'block' : 'none';
+  document.getElementById('view-messages').style.display = view==='messages' ? 'block' : 'none';
+  document.getElementById('view-admin').style.display = view==='admin' ? 'block' : 'none';
+  document.getElementById('view-settings').style.display = view==='settings' ? 'block' : 'none';
   document.getElementById('nav-feed').classList.toggle('active', view==='feed');
-  document.getElementById('nav-profile').classList.toggle('active', view==='profile');
+  document.getElementById('nav-profile').classList.toggle('active', view==='profile' || view==='settings');
   document.getElementById('nav-friends').classList.toggle('active', view==='friends');
   document.getElementById('nav-saved').classList.toggle('active', view==='saved');
+  document.getElementById('nav-messages').classList.toggle('active', view==='messages');
+  document.getElementById('nav-admin').classList.toggle('active', view==='admin');
   document.getElementById('bn-feed').classList.toggle('active', view==='feed');
-  document.getElementById('bn-profile').classList.toggle('active', view==='profile');
+  document.getElementById('bn-profile').classList.toggle('active', view==='profile' || view==='settings');
   document.getElementById('bn-friends').classList.toggle('active', view==='friends');
+  document.getElementById('bn-messages').classList.toggle('active', view==='messages');
   if(view==='profile') renderProfile();
   if(view==='friends') loadFriends();
   if(view==='saved') renderSavedView();
+  if(view==='messages') renderMessagesView();
+  if(view==='admin') renderReportsView();
+  if(view==='settings') renderSettingsView();
 }
 
 // ---------- বুট ----------
+applyTheme();
 tryRestore();
 </script>
 
