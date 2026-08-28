@@ -563,6 +563,18 @@
         <div id="reports-container">
           <div class="empty-state">লোড হচ্ছে...</div>
         </div>
+        <div class="side-title">ইউজার ম্যানেজমেন্ট — ভেরিফিকেশন ব্যাজ</div>
+        <div id="admin-users-container"></div>
+      </div>
+
+      <div id="view-dashboard" style="display:none;">
+        <div class="card" style="padding:4px 16px 16px;">
+          <div style="display:flex; align-items:center; gap:10px; padding:14px 4px 4px;">
+            <button class="icon-btn" onclick="showView('settings')" style="background:none;">←</button>
+            <div style="font-size:19px; font-weight:800;">প্রফেশনাল ড্যাশবোর্ড</div>
+          </div>
+          <div id="dashboard-body"></div>
+        </div>
       </div>
 
       <div id="view-settings" style="display:none;">
@@ -747,6 +759,13 @@ function escapeHtml(s){
   const d = document.createElement('div');
   d.innerText = s;
   return d.innerHTML;
+}
+function isVerified(username){
+  const u = USERS.find(x=>x.username===username);
+  return !!(u && u.verifiedBadge);
+}
+function vb(username){
+  return isVerified(username) ? ' <span title="ভেরিফায়েড" style="color:#3B82F6; font-size:13px;">✔️</span>' : '';
 }
 function timeAgo(ts){
   const diff = Math.floor((Date.now()-ts)/1000);
@@ -950,6 +969,7 @@ async function submitOtp(){
     }
     ME = result.username;
     localStorage.setItem('connectify_me', ME);
+    rememberAccount(ME);
     pendingUsername = null; pendingOtpPurpose = null;
     await enterApp();
   }catch(e){
@@ -1103,10 +1123,52 @@ function logOut(){
   setAuthMode('login');
 }
 
+// ---------- মাল্টি-অ্যাকাউন্ট (এই ডিভাইসে) ----------
+// নোট: এটা শুধু এই ব্রাউজারে আগে লগইন করা অ্যাকাউন্টগুলোর মধ্যে দ্রুত সোয়াপ করার সুবিধা —
+// পাসওয়ার্ড আবার লাগবে না, ঠিক যেমন সাধারণ "লগইন মনে রাখা" কাজ করে।
+function getRememberedAccounts(){
+  try{ return JSON.parse(localStorage.getItem('myadda_accounts') || '[]'); }catch(e){ return []; }
+}
+function rememberAccount(username){
+  let list = getRememberedAccounts().filter(u=>u!==username);
+  list.unshift(username);
+  list = list.slice(0, 5);
+  localStorage.setItem('myadda_accounts', JSON.stringify(list));
+}
+function forgetAccount(username){
+  const list = getRememberedAccounts().filter(u=>u!==username);
+  localStorage.setItem('myadda_accounts', JSON.stringify(list));
+  if(currentView === 'settings') renderSettingsView();
+}
+function switchAccount(username){
+  if(username === ME) return;
+  localStorage.setItem('connectify_me', username);
+  location.reload();
+}
+function openAccountSwitcher(){
+  const list = getRememberedAccounts();
+  document.getElementById('tag-modal-overlay').classList.add('show');
+  document.querySelector('#tag-modal-overlay .modal-header').innerHTML = `অ্যাকাউন্ট সুইচ করো <button class="modal-close" onclick="closeTagModal()">✕</button>`;
+  document.querySelector('#tag-modal-overlay .modal-footer').style.display = 'none';
+  const box = document.getElementById('tag-friend-list');
+  const others = list.filter(u=>u!==ME);
+  box.innerHTML = `
+    <div class="friend-item"><div class="friend-row">${avatarEl(ME,32)}<div class="friend-info"><div class="friend-item-name">${escapeHtml(ME)}${vb(ME)}</div><div style="font-size:12px; color:var(--sub);">এখন লগইন করা আছে</div></div></div></div>
+    ${others.map(u=>`
+      <div class="friend-item">
+        <div class="friend-row" style="cursor:pointer;" onclick="switchAccount('${escapeHtml(u)}')">${avatarEl(u,32)}<div class="friend-info"><div class="friend-item-name">${escapeHtml(u)}${vb(u)}</div></div></div>
+        <button class="btn-small outline" onclick="forgetAccount('${escapeHtml(u)}'); openAccountSwitcher();">সরাও</button>
+      </div>`).join('')}
+    ${!others.length ? `<div style="font-size:13px; color:var(--sub); padding:10px 4px;">এই ব্রাউজারে আর কোনো অ্যাকাউন্ট নেই। নতুন অ্যাকাউন্ট যোগ করতে লগ আউট করে অন্য অ্যাকাউন্টে লগইন করো — সেটা এখানে যোগ হয়ে যাবে।</div>` : ''}
+    <button class="btn-small outline" style="margin-top:10px; width:100%;" onclick="closeTagModal(); logOut();">➕ নতুন অ্যাকাউন্ট যোগ করো (লগ আউট করে লগইন করো)</button>
+  `;
+}
+
 async function tryRestore(){
   const saved = localStorage.getItem('connectify_me');
   if(saved){
     ME = saved;
+    rememberAccount(ME);
     await enterApp();
     return true;
   }
@@ -1429,7 +1491,7 @@ function postCardHtml(post){
       <div class="post-head">
         ${avatarEl(post.author, 40)}
         <div>
-          <div class="post-author">${escapeHtml(post.author)}</div>
+          <div class="post-author">${escapeHtml(post.author)}${vb(post.author)}</div>
           <div class="post-meta">${timeAgo(post.createdAt)} · ${privacyIcon(post.privacy)}${post.editedAt ? ' · সম্পাদিত' : ''}</div>
         </div>
         ${postMenuHtml(post)}
@@ -1604,7 +1666,7 @@ function renderProfile(){
     bigAv.innerHTML = '';
     bigAv.textContent = initials(ME);
   }
-  document.getElementById('profile-name-big').textContent = ME;
+  document.getElementById('profile-name-big').innerHTML = escapeHtml(ME) + vb(ME);
   const userInfo = userInfo0;
   const coverWrap = document.getElementById('profile-cover-wrap');
   const existingImg = coverWrap.querySelector('img');
@@ -1725,6 +1787,7 @@ async function loadUsers(){
   refreshMyAvatarNodes();
   if(currentView === 'profile') renderProfile();
   if(currentView === 'settings') renderSettingsView();
+  if(currentView === 'admin') renderAdminUsers();
 }
 function friendStatusWith(name){
   const rec = FRIENDS.find(f => (f.userA===ME && f.userB===name) || (f.userA===name && f.userB===ME));
@@ -1791,7 +1854,7 @@ function renderMembers(){
       <div class="friend-item">
         <div class="friend-row">
           ${avatarEl(u.username, 36)}
-          <div class="friend-info"><div class="friend-item-name">${escapeHtml(u.username)}</div></div>
+          <div class="friend-info"><div class="friend-item-name">${escapeHtml(u.username)}${vb(u.username)}</div></div>
         </div>
         ${actionHtml}
       </div>`;
@@ -2025,6 +2088,22 @@ function renderReportsView(){
         </div>
       </div>
     </div>`).join('');
+  renderAdminUsers();
+}
+function renderAdminUsers(){
+  const box = document.getElementById('admin-users-container');
+  if(!box) return;
+  if(!USERS.length){ box.innerHTML = `<div class="card empty-state">লোড হচ্ছে...</div>`; return; }
+  box.innerHTML = USERS.map(u => `
+    <div class="friend-item">
+      <div class="friend-row">${avatarEl(u.username,36)}<div class="friend-info"><div class="friend-item-name">${escapeHtml(u.username)}${vb(u.username)}</div></div></div>
+      <button class="btn-small ${u.verifiedBadge ? 'outline' : 'primary'}" onclick="toggleUserVerifiedBadge('${escapeHtml(u.username)}', ${!u.verifiedBadge})">${u.verifiedBadge ? 'ব্যাজ সরাও' : '✔️ ব্যাজ দাও'}</button>
+    </div>`).join('');
+}
+async function toggleUserVerifiedBadge(target, verified){
+  await apiPost({action:'adminSetVerifiedBadge', admin:ME, target, verified});
+  await loadUsers();
+  toast(verified ? `${target}-কে ভেরিফিকেশন ব্যাজ দেওয়া হলো` : `${target}-এর ব্যাজ সরানো হলো`);
 }
 async function resolveReportAction(reportId){
   await apiPost({action:'resolveReport', admin:ME, reportId});
@@ -2070,20 +2149,51 @@ function settingsComingSoonRow(icon, title, sub){
       <div class="settings-row-arrow">›</div>
     </div>`;
 }
+function renderDashboardView(){
+  const myPosts = POSTS.filter(p=>p.author===ME);
+  const totalPosts = myPosts.length;
+  const totalReactions = myPosts.reduce((sum,p)=>sum + Object.values(p.reactions||{}).reduce((s,arr)=>s+arr.length,0), 0);
+  const totalComments = myPosts.reduce((sum,p)=>sum + (p.comments ? p.comments.length : 0), 0);
+  const totalShares = POSTS.filter(p=>p.sharedFrom && myPosts.some(mp=>mp.postId===p.sharedFrom)).length;
+  const topPosts = [...myPosts].sort((a,b)=>{
+    const ra = Object.values(a.reactions||{}).reduce((s,arr)=>s+arr.length,0) + (a.comments?a.comments.length:0);
+    const rb = Object.values(b.reactions||{}).reduce((s,arr)=>s+arr.length,0) + (b.comments?b.comments.length:0);
+    return rb-ra;
+  }).slice(0,5);
+  const statCard = (label, value) => `<div class="card" style="flex:1; min-width:110px; padding:16px; text-align:center;"><div style="font-size:24px; font-weight:800; color:var(--blue-dark);">${value}</div><div style="font-size:12.5px; color:var(--sub); margin-top:4px;">${label}</div></div>`;
+  document.getElementById('dashboard-body').innerHTML = `
+    <div style="font-size:13px; color:var(--sub); padding:0 4px 14px;">এই ইনসাইট শুধু তোমার নিজের পোস্ট থেকে হিসাব করা হয়েছে — কোনো টাকা-পয়সা বা বিজ্ঞাপন ফিচার এখানে নেই।</div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; padding:0 4px 16px;">
+      ${statCard('মোট পোস্ট', totalPosts)}
+      ${statCard('মোট রিয়াকশন', totalReactions)}
+      ${statCard('মোট মন্তব্য', totalComments)}
+      ${statCard('মোট শেয়ার', totalShares)}
+    </div>
+    <div class="settings-section-title" style="padding-top:0;">সবচেয়ে বেশি সাড়া পাওয়া পোস্ট</div>
+    ${topPosts.length ? topPosts.map(p=>{
+      const r = Object.values(p.reactions||{}).reduce((s,arr)=>s+arr.length,0);
+      const c = p.comments ? p.comments.length : 0;
+      return `<div class="settings-row" style="cursor:pointer;" onclick="showView('feed'); setTimeout(()=>{const el=document.querySelector('[data-post-id=${p.postId}]'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'});},100)">
+        <div class="settings-icon">📝</div>
+        <div style="min-width:0; flex:1;"><div class="settings-row-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.text ? escapeHtml(p.text) : '(ছবি পোস্ট)'}</div><div class="settings-row-sub">👍 ${r} রিয়াকশন · 💬 ${c} মন্তব্য · ${timeAgo(p.createdAt)}</div></div>
+      </div>`;
+    }).join('') : `<div style="font-size:13px; color:var(--sub); padding:10px 4px;">এখনো কোনো পোস্ট নেই</div>`}
+  `;
+}
 function renderSettingsView(){
   const info = myUserInfo();
   const themeMode = localStorage.getItem('myadda_theme') || 'light';
   const themeLabel = themeMode==='system' ? 'সিস্টেম ডিফল্ট' : themeMode==='dark' ? 'ডার্ক' : 'লাইট';
   const html = `
     <div class="settings-section-title" style="padding-top:6px;">অ্যাকাউন্ট পরিবর্তন</div>
-    ${settingsComingSoonRow('👤','অন্য অ্যাকাউন্ট যোগ করো','একসাথে একাধিক অ্যাকাউন্ট চালানো — শীঘ্রই আসছে')}
+    ${settingsLinkRow('👤','অ্যাকাউন্ট সুইচ করো', getRememberedAccounts().length>1 ? `${getRememberedAccounts().length}টা অ্যাকাউন্ট এই ডিভাইসে সেভ আছে` : 'এই ডিভাইসে সেভ করা অ্যাকাউন্টের মধ্যে সুইচ করো', "openAccountSwitcher()")}
 
     <div class="settings-section-title">অ্যাকাউন্ট</div>
     ${settingsLinkRow('🪪','ব্যক্তিগত তথ্য', escapeHtml(ME) + (info.email ? ' · ' + escapeHtml(info.email) : ''), "openAboutModal()")}
     ${settingsLinkRow('🔒','পাসওয়ার্ড পরিবর্তন','তোমার পাসওয়ার্ড আপডেট করো', "openChangePasswordModal()")}
     ${settingsToggleRow('🔐','প্রোফাইল লক', 'লক করলে অ-বন্ধুরা তোমার পাবলিক পোস্ট দেখতে পাবে না', !!info.profileLocked, "toggleProfileLockAction(this.checked)")}
-    ${settingsComingSoonRow('📊','প্রফেশনাল ড্যাশবোর্ড','ইনসাইটস, মনিটাইজেশন ও আয়')}
-    ${settingsComingSoonRow('✅','ভেরিফিকেশন ব্যাজ','ভেরিফায়েড চেকমার্ক পান')}
+    ${settingsLinkRow('📊','প্রফেশনাল ড্যাশবোর্ড','নিজের পোস্টের রিয়াকশন ও মন্তব্যের ইনসাইট', "showView('dashboard')")}
+    ${settingsLinkRow('✅','ভেরিফিকেশন ব্যাজ', info.verifiedBadge ? 'তুমি ভেরিফায়েড ✔️' : 'অ্যাডমিন অনুমোদন করলে ব্যাজ পাবে', `showInfoModal('ভেরিফিকেশন ব্যাজ', '${info.verifiedBadge ? 'তোমার প্রোফাইলে ভেরিফিকেশন ব্যাজ যুক্ত আছে।' : 'অ্যাডমিন প্যানেল থেকে অ্যাডমিন কাউকে ভেরিফিকেশন ব্যাজ দিতে পারে। এটার জন্য কোনো পেমেন্ট লাগে না।'}')`)}
     ${settingsComingSoonRow('⭐','অ্যাম্বাসেডর হাব','প্রোগ্রামে যোগ দিন ও পুরস্কার অর্জন করুন')}
     ${settingsComingSoonRow('🔖','সংরক্ষিত রিলস','রিলস ফিচার এখনো যোগ হয়নি')}
 
@@ -2269,14 +2379,15 @@ function showView(view){
   document.getElementById('view-messages').style.display = view==='messages' ? 'block' : 'none';
   document.getElementById('view-admin').style.display = view==='admin' ? 'block' : 'none';
   document.getElementById('view-settings').style.display = view==='settings' ? 'block' : 'none';
+  document.getElementById('view-dashboard').style.display = view==='dashboard' ? 'block' : 'none';
   document.getElementById('nav-feed').classList.toggle('active', view==='feed');
-  document.getElementById('nav-profile').classList.toggle('active', view==='profile' || view==='settings');
+  document.getElementById('nav-profile').classList.toggle('active', view==='profile' || view==='settings' || view==='dashboard');
   document.getElementById('nav-friends').classList.toggle('active', view==='friends');
   document.getElementById('nav-saved').classList.toggle('active', view==='saved');
   document.getElementById('nav-messages').classList.toggle('active', view==='messages');
   document.getElementById('nav-admin').classList.toggle('active', view==='admin');
   document.getElementById('bn-feed').classList.toggle('active', view==='feed');
-  document.getElementById('bn-profile').classList.toggle('active', view==='profile' || view==='settings');
+  document.getElementById('bn-profile').classList.toggle('active', view==='profile' || view==='settings' || view==='dashboard');
   document.getElementById('bn-friends').classList.toggle('active', view==='friends');
   document.getElementById('bn-messages').classList.toggle('active', view==='messages');
   if(view==='profile') renderProfile();
@@ -2285,6 +2396,7 @@ function showView(view){
   if(view==='messages') renderMessagesView();
   if(view==='admin') renderReportsView();
   if(view==='settings') renderSettingsView();
+  if(view==='dashboard') renderDashboardView();
 }
 
 // ---------- বুট ----------
