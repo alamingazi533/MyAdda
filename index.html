@@ -440,13 +440,19 @@
         <div class="nav-icon" style="background:#E7F3FF;">💬</div> মেসেজ
         <span class="nav-badge" id="msg-badge-nav" style="display:none;"></span>
       </div>
+      <div class="nav-item" id="nav-reels" onclick="showView('reels')">
+        <div class="nav-icon" style="background:#F3E8FF;">🎬</div> রিলস
+      </div>
+      <div class="nav-item" id="nav-pages" onclick="showView('pages')">
+        <div class="nav-icon" style="background:#FFF7E0;">📄</div> পেজ
+      </div>
       <div class="nav-item" id="nav-admin" style="display:none;" onclick="showView('admin')">
         <div class="nav-icon" style="background:#FFF3E0;">🛠️</div> অ্যাডমিন প্যানেল
         <span class="nav-badge" id="report-badge-nav" style="display:none;"></span>
       </div>
       <div class="side-title" style="margin-top:20px;">শীঘ্রই আসছে</div>
       <div style="font-size:13px; color:var(--sub); padding:0 8px; line-height:1.6;">
-        রিল, স্টোরি ও গ্রুপ ফিচার পরবর্তী ধাপে যোগ হবে।
+        স্টোরি ও গ্রুপ ফিচার পরবর্তী ধাপে যোগ হবে।
       </div>
     </aside>
 
@@ -458,13 +464,21 @@
             <div class="composer-input" onclick="openComposer()">তুমি কী নিয়ে ভাবছো, <span id="composer-name-hint"></span>?</div>
           </div>
           <div id="composer-expand" style="display:none;">
+            <div id="post-as-page-wrap" style="display:none; margin-bottom:8px;">
+              <select class="privacy-select" id="post-as-page-select" onchange="postAsPageId=this.value;">
+                <option value="">নিজের নামে পোস্ট করো</option>
+              </select>
+            </div>
             <textarea id="post-text" placeholder="তুমি কী নিয়ে ভাবছো?"></textarea>
             <div id="image-preview-container"></div>
+            <div id="video-preview-container"></div>
             <input type="file" id="image-file-input" accept="image/*" multiple style="display:none;" onchange="handleImageSelect(event)">
+            <input type="file" id="video-file-input" accept="video/*" style="display:none;" onchange="handleVideoSelect(event)">
             <div id="tag-chips-container" style="display:none; flex-wrap:wrap; gap:6px; margin:8px 0;"></div>
             <div class="composer-divider"></div>
             <div class="composer-actions">
               <button class="btn-photo" onclick="document.getElementById('image-file-input').click()">🖼️ ছবি</button>
+              <button class="btn-photo" onclick="document.getElementById('video-file-input').click()">🎥 ভিডিও</button>
               <button class="btn-photo" onclick="openTagModal()">🏷️ ট্যাগ বন্ধু</button>
               <select class="privacy-select" id="post-privacy">
                 <option value="public">🌐 সবাই দেখতে পাবে</option>
@@ -558,6 +572,41 @@
         </div>
       </div>
 
+      <div id="view-reels" style="display:none;">
+        <div class="side-title" style="margin-top:0;">🎬 রিলস</div>
+        <div id="reels-container"></div>
+      </div>
+
+      <div id="view-pages" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="side-title" style="margin-top:0;">পেজসমূহ</div>
+          <button class="btn-small primary" onclick="openCreatePageModal()">➕ পেজ তৈরি করো</button>
+        </div>
+        <div class="side-title" style="margin-top:14px;">আমার পেজ</div>
+        <div id="my-pages-container"></div>
+        <div class="side-title">সব পেজ</div>
+        <div id="all-pages-container"></div>
+      </div>
+
+      <div id="view-page-detail" style="display:none;">
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div id="page-detail-cover" style="height:140px; background:var(--hover); position:relative;">
+            <button class="icon-btn" onclick="showView('pages')" style="position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.4); color:#fff;">←</button>
+          </div>
+          <div style="padding:16px; display:flex; gap:14px; align-items:center;">
+            <div id="page-detail-avatar"></div>
+            <div style="flex:1; min-width:0;">
+              <div id="page-detail-name" style="font-size:19px; font-weight:800;"></div>
+              <div id="page-detail-meta" style="font-size:13px; color:var(--sub);"></div>
+            </div>
+          </div>
+          <div style="padding:0 16px 16px; display:flex; gap:8px;" id="page-detail-actions"></div>
+          <div style="padding:0 16px 16px; font-size:13.5px;" id="page-detail-description"></div>
+        </div>
+        <div class="side-title">পোস্টসমূহ</div>
+        <div id="page-detail-posts"></div>
+      </div>
+
       <div id="view-admin" style="display:none;">
         <div class="side-title" style="margin-top:0;">রিপোর্ট করা কনটেন্ট</div>
         <div id="reports-container">
@@ -599,6 +648,7 @@
     <button class="bottom-nav-item" id="bn-friends" onclick="showView('friends')">
       👥<span class="bn-badge" id="req-badge-bn" style="display:none;"></span>
     </button>
+    <button class="bottom-nav-item" id="bn-reels" onclick="showView('reels')">🎬</button>
     <button class="bottom-nav-item" id="bn-messages" onclick="showView('messages')">
       💬<span class="bn-badge" id="msg-badge-bn" style="display:none;"></span>
     </button>
@@ -675,6 +725,21 @@
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="page-modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header"><span id="page-modal-title">নতুন পেজ তৈরি করো</span> <button class="modal-close" onclick="closePageModal()">✕</button></div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:10px;">
+      <input type="text" id="page-name-input" placeholder="পেজের নাম" style="padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text);">
+      <input type="text" id="page-category-input" placeholder="ক্যাটাগরি (যেমন: রেস্টুরেন্ট, ব্লগ, কমিউনিটি)" style="padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text);">
+      <textarea id="page-description-input" placeholder="পেজ সম্পর্কে সংক্ষেপে লেখো" style="padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); min-height:70px; resize:vertical;"></textarea>
+      <div id="page-modal-error" style="color:#D63447; font-size:13px; display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-small outline" onclick="closePageModal()">বাতিল</button>
+      <button class="btn-small primary" onclick="submitPageModal()">সেভ করো</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="info-modal-overlay">
   <div class="modal-box">
     <div class="modal-header"><span id="info-modal-title"></span> <button class="modal-close" onclick="closeInfoModal()">✕</button></div>
@@ -723,6 +788,11 @@ let MESSAGES = [];
 let REPORTS = [];
 let activeConversationUser = null;
 let selectedTagUsers = [];
+let PAGES = [];
+let selectedVideoDataUrl = null;
+let postAsPageId = '';
+let editingPageId = null;
+let viewingPageId = null;
 const AVATAR_COLORS = ['#6C5CE7','#E4405F','#22C55E','#F5A623','#8B5CF6','#00B8D9','#EC4899','#4E9BFF'];
 const REACTIONS = { like:'👍', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡' };
 
@@ -1087,12 +1157,14 @@ async function enterApp(){
   await loadNotifications();
   await loadMessages();
   await loadReports();
+  await loadPages();
   setInterval(loadPosts, 15000);
   setInterval(loadUsers, 20000);
   setInterval(loadFriends, 15000);
   setInterval(loadNotifications, 15000);
   setInterval(loadMessages, 8000);
   setInterval(loadReports, 20000);
+  setInterval(loadPages, 20000);
 }
 function setAvatarNode(node, name, size){
   const url = avatarUrlFor(name);
@@ -1179,11 +1251,22 @@ async function tryRestore(){
 function openComposer(){
   document.getElementById('composer-expand').style.display = 'block';
   document.getElementById('post-text').focus();
+  refreshPostAsPageOptions();
+}
+function refreshPostAsPageOptions(){
+  const myPages = PAGES.filter(p=>p.owner===ME);
+  const wrap = document.getElementById('post-as-page-wrap');
+  const sel = document.getElementById('post-as-page-select');
+  if(!myPages.length){ wrap.style.display = 'none'; postAsPageId = ''; return; }
+  wrap.style.display = 'block';
+  sel.innerHTML = `<option value="">নিজের নামে পোস্ট করো</option>` + myPages.map(p=>`<option value="${p.pageId}">📄 ${escapeHtml(p.name)} পেজ হয়ে পোস্ট করো</option>`).join('');
+  sel.value = postAsPageId;
 }
 const MAX_POST_IMAGES = 6;
+const MAX_VIDEO_MB = 20;
 function updatePostBtnState(){
   const hasText = document.getElementById('post-text').value.trim().length > 0;
-  document.getElementById('post-btn').disabled = !(hasText || selectedImagesDataUrls.length);
+  document.getElementById('post-btn').disabled = !(hasText || selectedImagesDataUrls.length || selectedVideoDataUrl);
 }
 function renderImagePreviews(){
   const box = document.getElementById('image-preview-container');
@@ -1194,9 +1277,37 @@ function renderImagePreviews(){
       <button class="image-remove" onclick="removeSelectedImage(${idx})">✕</button>
     </div>`).join('') + `</div>`;
 }
+function renderVideoPreview(){
+  const box = document.getElementById('video-preview-container');
+  if(!selectedVideoDataUrl){ box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="image-preview-wrap" style="width:100%; max-width:280px;">
+    <video src="${selectedVideoDataUrl}" controls style="width:100%; border-radius:12px; display:block;"></video>
+    <button class="image-remove" onclick="removeSelectedVideo()">✕</button>
+  </div>`;
+}
+function handleVideoSelect(evt){
+  const file = (evt.target.files || [])[0];
+  evt.target.value = '';
+  if(!file) return;
+  if(file.size > MAX_VIDEO_MB * 1024 * 1024){ toast(`ভিডিও সর্বোচ্চ ${MAX_VIDEO_MB}MB এর হতে হবে`); return; }
+  if(selectedImagesDataUrls.length){ selectedImagesDataUrls = []; renderImagePreviews(); toast('ভিডিও দিলে ছবি বাদ যাবে — একসাথে দুটো দেওয়া যায় না'); }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    selectedVideoDataUrl = e.target.result;
+    renderVideoPreview();
+    updatePostBtnState();
+  };
+  reader.readAsDataURL(file);
+}
+function removeSelectedVideo(){
+  selectedVideoDataUrl = null;
+  renderVideoPreview();
+  updatePostBtnState();
+}
 function handleImageSelect(evt){
   const files = Array.from(evt.target.files || []);
   if(!files.length) return;
+  if(selectedVideoDataUrl){ toast('ভিডিও থাকলে ছবি দেওয়া যাবে না — আগে ভিডিওটা সরাও'); evt.target.value=''; return; }
   const room = MAX_POST_IMAGES - selectedImagesDataUrls.length;
   if(room <= 0){ toast('সর্বোচ্চ ' + MAX_POST_IMAGES + 'টা ছবি দেওয়া যাবে'); evt.target.value=''; return; }
   files.slice(0, room).forEach(file => {
@@ -1296,22 +1407,26 @@ function visibleToMe(post){
 async function submitPost(){
   const textEl = document.getElementById('post-text');
   const text = textEl.value.trim();
-  if(!text && !selectedImagesDataUrls.length) return;
+  if(!text && !selectedImagesDataUrls.length && !selectedVideoDataUrl) return;
   const btn = document.getElementById('post-btn');
   btn.disabled = true;
   const privacy = document.getElementById('post-privacy').value;
   try{
-    await apiPost({action:'createPost', author:ME, text, imagesBase64:selectedImagesDataUrls, privacy, taggedUsers:selectedTagUsers});
+    await apiPost({action:'createPost', author:ME, text, imagesBase64:selectedImagesDataUrls, videoBase64:selectedVideoDataUrl, privacy, taggedUsers:selectedTagUsers, postedAsPage:postAsPageId});
     textEl.value = '';
     selectedImagesDataUrls = [];
+    selectedVideoDataUrl = null;
     selectedTagUsers = [];
+    postAsPageId = '';
+    document.getElementById('post-as-page-select').value = '';
     renderImagePreviews();
+    renderVideoPreview();
     renderTagChips();
     document.getElementById('composer-expand').style.display = 'none';
     await loadPosts();
     toast('পোস্ট হয়ে গেছে');
   }catch(e){
-    toast('পোস্ট করতে সমস্যা হয়েছে — ছবি বড় হলে একটু ছোট ছবি দিয়ে চেষ্টা করো');
+    toast('পোস্ট করতে সমস্যা হয়েছে — ছবি/ভিডিও বড় হলে একটু ছোট সাইজ দিয়ে চেষ্টা করো');
   }
   btn.disabled = false;
 }
@@ -1410,6 +1525,7 @@ function postMenuHtml(post){
       <button class="post-menu-btn" onclick="event.stopPropagation(); togglePostMenu('${post.postId}')">⋯</button>
       <div class="post-menu" id="menu-${post.postId}">
         <button onclick="closeAllMenus(); openEditPostModal('${post.postId}')">✏️ এডিট করো</button>
+        <button onclick="closeAllMenus(); togglePinPostAction('${post.postId}', ${!post.pinned})">${post.pinned ? '📌 আনপিন করো' : '📌 প্রোফাইলে পিন করো'}</button>
         <button class="danger" onclick="closeAllMenus(); deletePost('${post.postId}')">🗑️ মুছে ফেলো</button>
       </div>`;
   }
@@ -1470,6 +1586,16 @@ function postImagesHtml(post){
     </div>`;
   }).join('') + `</div>`;
 }
+function postVideoHtml(post){
+  if(!post.videoUrl) return '';
+  const autoplayAttrs = isVideoAutoplayOn() ? 'autoplay muted loop playsinline' : 'controls';
+  return `<video src="${post.videoUrl}" ${autoplayAttrs} controls style="width:100%; border-radius:12px; max-height:520px; background:#000; display:block;"></video>`;
+}
+async function togglePinPostAction(postId, pinned){
+  await apiPost({action:'togglePinPost', postId, author:ME, pinned});
+  await loadPosts();
+  toast(pinned ? 'পোস্টটা প্রোফাইলে পিন করা হলো' : 'পিন সরানো হলো');
+}
 function postCardHtml(post){
   const myReact = myReactionOn(post);
   const liked = !!myReact;
@@ -1483,22 +1609,27 @@ function postCardHtml(post){
     </div>
   `).join('');
   const imageHtml = postImagesHtml(post);
+  const videoHtml = postVideoHtml(post);
   const labels = {like:'লাইক', love:'ভালোবাসা', haha:'হাহা', wow:'বাহ', sad:'কষ্ট', angry:'রাগ'};
   const reactBtnLabel = myReact ? `${REACTIONS[myReact]} ${labels[myReact]}` : '👍 লাইক';
   const sharedHeader = post.sharedFrom ? `<div class="shared-header">↗️ ${escapeHtml(post.author)} শেয়ার করেছে</div>` : '';
+  const page = post.postedAsPage ? PAGES.find(p=>p.pageId===post.postedAsPage) : null;
+  const headName = page ? escapeHtml(page.name) + ' <span style="font-size:11px; color:var(--sub); font-weight:600;">· পেজ</span>' : escapeHtml(post.author) + vb(post.author);
+  const headAvatarEl = page ? (page.avatarUrl ? `<div class="avatar" style="width:40px;height:40px;"><img src="${page.avatarUrl}"></div>` : `<div class="avatar" style="width:40px;height:40px;font-size:16px;background:var(--blue);">📄</div>`) : avatarEl(post.author, 40);
   return `
     <div class="card post" data-post-id="${post.postId}">
+      ${post.pinned ? `<div style="font-size:12.5px; color:var(--sub); font-weight:700; padding:10px 16px 0;">📌 পিন করা পোস্ট</div>` : ''}
       <div class="post-head">
-        ${avatarEl(post.author, 40)}
+        ${headAvatarEl}
         <div>
-          <div class="post-author">${escapeHtml(post.author)}${vb(post.author)}</div>
+          <div class="post-author">${headName}</div>
           <div class="post-meta">${timeAgo(post.createdAt)} · ${privacyIcon(post.privacy)}${post.editedAt ? ' · সম্পাদিত' : ''}</div>
         </div>
         ${postMenuHtml(post)}
       </div>
       ${post.text ? `<div class="post-text">${escapeHtml(post.text)}</div>` : ''}
       ${post.taggedUsers && post.taggedUsers.length ? `<div style="font-size:13px; color:var(--sub); padding:0 18px 8px;">🏷️ ট্যাগ করেছে: ${post.taggedUsers.map(u=>`<b>${escapeHtml(u)}</b>`).join(', ')}</div>` : ''}
-      ${imageHtml}
+      ${videoHtml || imageHtml}
       ${sharedOriginalHtml(post)}
       <div class="post-stats">
         <span>${reactSummaryHtml(post)}</span>
@@ -1562,6 +1693,9 @@ function isPushNotifOn(){
 }
 function isDataSaverOn(){
   return localStorage.getItem('myadda_data_saver') === 'on';
+}
+function isVideoAutoplayOn(){
+  return localStorage.getItem('myadda_video_autoplay') !== 'off';
 }
 async function loadNotifications(){
   if(!isPushNotifOn()) return;
@@ -1958,6 +2092,125 @@ function renderFriendsView(){
 }
 
 // ---------- মেসেজিং ----------
+// ---------- পেজ ----------
+async function loadPages(){
+  try{
+    const result = await apiGet('getPages');
+    PAGES = result.success ? result.pages : [];
+  }catch(e){ PAGES = []; }
+  if(currentView === 'pages') renderPagesView();
+  if(currentView === 'page-detail' && viewingPageId) renderPageDetail(viewingPageId);
+  if(currentView === 'feed') renderFeed();
+  if(currentView === 'profile') renderProfile();
+}
+function openCreatePageModal(){
+  editingPageId = null;
+  document.getElementById('page-modal-title').textContent = 'নতুন পেজ তৈরি করো';
+  document.getElementById('page-name-input').value = '';
+  document.getElementById('page-category-input').value = '';
+  document.getElementById('page-description-input').value = '';
+  document.getElementById('page-modal-error').style.display = 'none';
+  document.getElementById('page-modal-overlay').classList.add('show');
+}
+function openEditPageModal(pageId){
+  const page = PAGES.find(p=>p.pageId===pageId);
+  if(!page) return;
+  editingPageId = pageId;
+  document.getElementById('page-modal-title').textContent = 'পেজ এডিট করো';
+  document.getElementById('page-name-input').value = page.name || '';
+  document.getElementById('page-category-input').value = page.category || '';
+  document.getElementById('page-description-input').value = page.description || '';
+  document.getElementById('page-modal-error').style.display = 'none';
+  document.getElementById('page-modal-overlay').classList.add('show');
+}
+function closePageModal(){
+  document.getElementById('page-modal-overlay').classList.remove('show');
+}
+async function submitPageModal(){
+  const name = document.getElementById('page-name-input').value.trim();
+  const category = document.getElementById('page-category-input').value.trim();
+  const description = document.getElementById('page-description-input').value.trim();
+  const errEl = document.getElementById('page-modal-error');
+  if(!name){ errEl.textContent = 'পেজের নাম লেখো'; errEl.style.display='block'; return; }
+  if(editingPageId){
+    await apiPost({action:'updatePage', pageId:editingPageId, owner:ME, name, category, description});
+  } else {
+    await apiPost({action:'createPage', owner:ME, name, category, description});
+  }
+  closePageModal();
+  await loadPages();
+  toast(editingPageId ? 'পেজ আপডেট হয়েছে' : 'পেজ তৈরি হয়েছে');
+}
+function renderPagesView(){
+  const mine = PAGES.filter(p=>p.owner===ME);
+  const others = PAGES.filter(p=>p.owner!==ME);
+  const pageRow = (p) => `
+    <div class="friend-item" style="cursor:pointer;" onclick="openPageDetail('${p.pageId}')">
+      <div class="friend-row">
+        ${p.avatarUrl ? `<div class="avatar" style="width:36px;height:36px;"><img src="${p.avatarUrl}"></div>` : `<div class="avatar" style="width:36px;height:36px;background:var(--blue);">📄</div>`}
+        <div class="friend-info"><div class="friend-item-name">${escapeHtml(p.name)}</div><div style="font-size:12px; color:var(--sub);">${p.followers.length} ফলোয়ার${p.category ? ' · ' + escapeHtml(p.category) : ''}</div></div>
+      </div>
+    </div>`;
+  document.getElementById('my-pages-container').innerHTML = mine.length ? mine.map(pageRow).join('') : `<div style="font-size:13px; color:var(--sub); padding:6px 4px;">তুমি এখনো কোনো পেজ বানাওনি</div>`;
+  document.getElementById('all-pages-container').innerHTML = others.length ? others.map(pageRow).join('') : `<div style="font-size:13px; color:var(--sub); padding:6px 4px;">এখনো আর কোনো পেজ নেই</div>`;
+}
+function openPageDetail(pageId){
+  viewingPageId = pageId;
+  showView('page-detail');
+}
+function renderPageDetail(pageId){
+  const page = PAGES.find(p=>p.pageId===pageId);
+  if(!page){ showView('pages'); return; }
+  const coverEl = document.getElementById('page-detail-cover');
+  const btnBack = coverEl.querySelector('button');
+  coverEl.style.backgroundImage = page.coverUrl ? `url('${page.coverUrl}')` : '';
+  coverEl.style.backgroundSize = 'cover';
+  coverEl.style.backgroundPosition = 'center';
+  coverEl.innerHTML = '';
+  coverEl.appendChild(btnBack);
+  document.getElementById('page-detail-avatar').innerHTML = page.avatarUrl ? `<div class="avatar" style="width:64px;height:64px;"><img src="${page.avatarUrl}"></div>` : `<div class="avatar" style="width:64px;height:64px;font-size:26px;background:var(--blue);">📄</div>`;
+  document.getElementById('page-detail-name').textContent = page.name;
+  document.getElementById('page-detail-meta').textContent = `${page.followers.length} ফলোয়ার${page.category ? ' · ' + page.category : ''}`;
+  document.getElementById('page-detail-description').textContent = page.description || '';
+  const isOwner = page.owner === ME;
+  const isFollowing = page.followers.includes(ME);
+  document.getElementById('page-detail-actions').innerHTML = isOwner
+    ? `<button class="btn-small outline" onclick="openEditPageModal('${page.pageId}')">✏️ এডিট করো</button>
+       <button class="btn-small outline" onclick="document.getElementById('page-avatar-file').click()">🖼️ প্রোফাইল ছবি</button>
+       <button class="btn-small outline" onclick="document.getElementById('page-cover-file').click()">🌄 কভার ছবি</button>
+       <input type="file" id="page-avatar-file" accept="image/*" style="display:none;" onchange="handlePageImageUpload(event,'avatar','${page.pageId}')">
+       <input type="file" id="page-cover-file" accept="image/*" style="display:none;" onchange="handlePageImageUpload(event,'cover','${page.pageId}')">`
+    : `<button class="btn-small ${isFollowing ? 'outline' : 'primary'}" onclick="followPageAction('${page.pageId}')">${isFollowing ? 'আনফলো' : 'ফলো করো'}</button>`;
+  const pagePosts = POSTS.filter(p=>p.postedAsPage===page.pageId);
+  document.getElementById('page-detail-posts').innerHTML = pagePosts.length ? pagePosts.map(postCardHtml).join('') : `<div class="card empty-state">এই পেজে এখনো কোনো পোস্ট নেই</div>`;
+}
+function handlePageImageUpload(evt, kind, pageId){
+  const file = (evt.target.files || [])[0];
+  evt.target.value = '';
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(e){
+    const action = kind === 'avatar' ? 'uploadPageAvatar' : 'uploadPageCover';
+    await apiPost({action, pageId, owner:ME, imageBase64:e.target.result});
+    await loadPages();
+    renderPageDetail(pageId);
+    toast('আপডেট হয়েছে');
+  };
+  reader.readAsDataURL(file);
+}
+async function followPageAction(pageId){
+  await apiPost({action:'followPage', username:ME, pageId});
+  await loadPages();
+  renderPageDetail(pageId);
+}
+
+// ---------- রিলস ----------
+function renderReelsView(){
+  const reels = POSTS.filter(p=>p.videoUrl).filter(visibleToMe).filter(p=>!isBlockedEitherWay(p.author));
+  const box = document.getElementById('reels-container');
+  box.innerHTML = reels.length ? reels.map(postCardHtml).join('') : `<div class="card empty-state"><h3>এখনো কোনো রিল নেই</h3>পোস্ট কম্পোজার থেকে 🎥 বাটনে ভিডিও যোগ করে প্রথম রিলটা বানাও!</div>`;
+}
+
 async function loadMessages(){
   try{
     const result = await apiGet('getMessages', {username:ME});
@@ -2195,7 +2448,7 @@ function renderSettingsView(){
     ${settingsLinkRow('📊','প্রফেশনাল ড্যাশবোর্ড','নিজের পোস্টের রিয়াকশন ও মন্তব্যের ইনসাইট', "showView('dashboard')")}
     ${settingsLinkRow('✅','ভেরিফিকেশন ব্যাজ', info.verifiedBadge ? 'তুমি ভেরিফায়েড ✔️' : 'অ্যাডমিন অনুমোদন করলে ব্যাজ পাবে', `showInfoModal('ভেরিফিকেশন ব্যাজ', '${info.verifiedBadge ? 'তোমার প্রোফাইলে ভেরিফিকেশন ব্যাজ যুক্ত আছে।' : 'অ্যাডমিন প্যানেল থেকে অ্যাডমিন কাউকে ভেরিফিকেশন ব্যাজ দিতে পারে। এটার জন্য কোনো পেমেন্ট লাগে না।'}')`)}
     ${settingsComingSoonRow('⭐','অ্যাম্বাসেডর হাব','প্রোগ্রামে যোগ দিন ও পুরস্কার অর্জন করুন')}
-    ${settingsComingSoonRow('🔖','সংরক্ষিত রিলস','রিলস ফিচার এখনো যোগ হয়নি')}
+    ${settingsLinkRow('🔖','সংরক্ষিত রিলস ও পোস্ট','সেভ করা সব পোস্ট/রিল একসাথে দেখো', "showView('saved')")}
 
     <div class="settings-section-title">অ্যাপিয়ারেন্স</div>
     ${settingsLinkRow('🌙','থিম', themeLabel, "openThemeChooser()")}
@@ -2207,7 +2460,7 @@ function renderSettingsView(){
     <div class="settings-section-title">পছন্দসমূহ</div>
     ${settingsToggleRow('🔔','পুশ নোটিফিকেশন','বন্ধুদের থেকে নোটিফিকেশন পান', isPushNotifOn(), "togglePushNotif(this.checked)")}
     ${settingsToggleRow('📶','ডেটা সেভার মোড','ডেটা ব্যবহার কমাও — ছবি ট্যাপ করলে দেখা যাবে', isDataSaverOn(), "toggleDataSaver(this.checked)")}
-    ${settingsComingSoonRow('▶️','ভিডিও স্বয়ংক্রিয় প্লে','ভিডিও ফিচার এখনো যোগ হয়নি')}
+    ${settingsToggleRow('▶️','ভিডিও স্বয়ংক্রিয় প্লে','স্ক্রল করার সময় ভিডিও নিজে থেকেই চলবে (মিউট অবস্থায়)', isVideoAutoplayOn(), "toggleVideoAutoplay(this.checked)")}
 
     <div class="settings-section-title">সাপোর্ট</div>
     ${settingsLinkRow('🆘','সাহায্য ও সহায়তা','অ্যাপ ব্যবহারে সমস্যা?', "showInfoModal('সাহায্য ও সহায়তা','যেকোনো সমস্যায় অ্যাপের অ্যাডমিনের সাথে যোগাযোগ করো। বাগ রিপোর্ট বা ফিচার আইডিয়া থাকলে জানাতে পারো।')")}
@@ -2216,9 +2469,9 @@ function renderSettingsView(){
     ${settingsLinkRow('ℹ️','সম্পর্কে','Version 1.0.0', "showInfoModal('MyAdda সম্পর্কে','MyAdda — বন্ধুদের সাথে যুক্ত থাকার একটা ছোট্ট বাংলা সোশ্যাল অ্যাপ। Version 1.0.0')")}
 
     <div class="settings-section-title">ব্যবসা</div>
-    ${settingsComingSoonRow('💳','ওয়ালেট','ব্যালেন্স ও লেনদেন')}
-    ${settingsComingSoonRow('📢','আমার বিজ্ঞাপন','বিজ্ঞাপন পরিচালনা')}
-    ${settingsComingSoonRow('📄','আমার পেজ','পেজ পরিচালনা')}
+    ${settingsComingSoonRow('💳','ওয়ালেট','আসল টাকা লেনদেন — পেমেন্ট গেটওয়ে ছাড়া বানানো সম্ভব না')}
+    ${settingsLinkRow('📌','পোস্ট প্রোমোট করো','টাকা ছাড়া — পোস্টের ⋯ মেনু থেকে প্রোফাইলে পিন করে উপরে রাখো', "showInfoModal('পোস্ট প্রোমোট করো','সত্যিকারের বিজ্ঞাপন সিস্টেম এখানে নেই, কিন্তু তুমি নিজের যেকোনো পোস্টের ⋯ মেনু থেকে সেটাকে প্রোফাইলে পিন করে সবার আগে দেখাতে পারো — এটাই এখানে \\'প্রোমোট\\' করার সবচেয়ে কাছাকাছি জিনিস।')")}
+    ${settingsLinkRow('📄','আমার পেজ','পেজ তৈরি ও পরিচালনা করো', "showView('pages')")}
 
     <div class="settings-section-title"></div>
     <div class="settings-row" onclick="logOut()"><div class="settings-icon">↩️</div><div class="settings-row-title" style="color:#D63447;">লগ আউট</div></div>
@@ -2255,6 +2508,13 @@ function toggleDataSaver(checked){
   renderFeed();
   if(currentView==='profile') renderProfile();
   toast(checked ? 'ডেটা সেভার চালু হলো' : 'ডেটা সেভার বন্ধ হলো');
+}
+function toggleVideoAutoplay(checked){
+  localStorage.setItem('myadda_video_autoplay', checked ? 'on' : 'off');
+  renderFeed();
+  if(currentView==='profile') renderProfile();
+  if(currentView==='reels') renderReelsView();
+  toast(checked ? 'ভিডিও অটোপ্লে চালু হলো' : 'ভিডিও অটোপ্লে বন্ধ হলো');
 }
 async function clearAppCache(){
   POSTS = []; USERS = []; FRIENDS = []; NOTIFICATIONS = []; MESSAGES = [];
@@ -2380,16 +2640,22 @@ function showView(view){
   document.getElementById('view-admin').style.display = view==='admin' ? 'block' : 'none';
   document.getElementById('view-settings').style.display = view==='settings' ? 'block' : 'none';
   document.getElementById('view-dashboard').style.display = view==='dashboard' ? 'block' : 'none';
+  document.getElementById('view-reels').style.display = view==='reels' ? 'block' : 'none';
+  document.getElementById('view-pages').style.display = view==='pages' ? 'block' : 'none';
+  document.getElementById('view-page-detail').style.display = view==='page-detail' ? 'block' : 'none';
   document.getElementById('nav-feed').classList.toggle('active', view==='feed');
   document.getElementById('nav-profile').classList.toggle('active', view==='profile' || view==='settings' || view==='dashboard');
   document.getElementById('nav-friends').classList.toggle('active', view==='friends');
   document.getElementById('nav-saved').classList.toggle('active', view==='saved');
   document.getElementById('nav-messages').classList.toggle('active', view==='messages');
   document.getElementById('nav-admin').classList.toggle('active', view==='admin');
+  document.getElementById('nav-reels').classList.toggle('active', view==='reels');
+  document.getElementById('nav-pages').classList.toggle('active', view==='pages' || view==='page-detail');
   document.getElementById('bn-feed').classList.toggle('active', view==='feed');
   document.getElementById('bn-profile').classList.toggle('active', view==='profile' || view==='settings' || view==='dashboard');
   document.getElementById('bn-friends').classList.toggle('active', view==='friends');
   document.getElementById('bn-messages').classList.toggle('active', view==='messages');
+  document.getElementById('bn-reels').classList.toggle('active', view==='reels');
   if(view==='profile') renderProfile();
   if(view==='friends') loadFriends();
   if(view==='saved') renderSavedView();
@@ -2397,6 +2663,9 @@ function showView(view){
   if(view==='admin') renderReportsView();
   if(view==='settings') renderSettingsView();
   if(view==='dashboard') renderDashboardView();
+  if(view==='reels') renderReelsView();
+  if(view==='pages') renderPagesView();
+  if(view==='page-detail') renderPageDetail(viewingPageId);
 }
 
 // ---------- বুট ----------
